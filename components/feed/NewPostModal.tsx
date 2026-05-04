@@ -5,10 +5,12 @@ import { useDropzone } from "react-dropzone"
 import Image from "next/image"
 import {
   Upload, ImagePlus, X, Loader2,
-  Sparkles, ShowerHead, AlertTriangle, Accessibility, Users,
+  Sparkles, ShowerHead, AlertTriangle,
+  Accessibility, Users, MapPin, ShoppingBag, Link,
 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { StarRating } from "@/components/feed/StarRating"
@@ -32,6 +34,10 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
   const [preview, setPreview] = useState<string | null>(null)
   const [caption, setCaption] = useState("")
   const [rating, setRating] = useState(0)
+  const [storeName, setStoreName] = useState("")
+  const [storeUrl, setStoreUrl] = useState("")
+  const [address, setAddress] = useState("")
+  const [googleMapsUrl, setGoogleMapsUrl] = useState("")
   const [hasAdultChangingStation, setHasAdultChangingStation] = useState(false)
   const [isFamilyFriendly, setIsFamilyFriendly] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(false)
@@ -45,17 +51,10 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
       fd.append("image", f)
       const res = await fetch("/api/moderate", { method: "POST", body: fd })
       const json = await res.json() as { approved: boolean; reason: string }
-      if (json.approved) {
-        setModeration("approved")
-        return true
-      } else {
-        setModeration("rejected")
-        setModerationReason(json.reason ?? "")
-        return false
-      }
+      if (json.approved) { setModeration("approved"); return true }
+      else { setModeration("rejected"); setModerationReason(json.reason ?? ""); return false }
     } catch {
-      setModeration("approved")
-      return true
+      setModeration("approved"); return true
     }
   }, [])
 
@@ -79,18 +78,16 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
 
   const clearImage = () => {
     if (preview) URL.revokeObjectURL(preview)
-    setFile(null)
-    setPreview(null)
-    setModeration("idle")
-    setModerationReason("")
+    setFile(null); setPreview(null)
+    setModeration("idle"); setModerationReason("")
   }
 
   const reset = () => {
     clearImage()
-    setCaption("")
-    setRating(0)
-    setHasAdultChangingStation(false)
-    setIsFamilyFriendly(null)
+    setCaption(""); setRating(0)
+    setStoreName(""); setStoreUrl("")
+    setAddress(""); setGoogleMapsUrl("")
+    setHasAdultChangingStation(false); setIsFamilyFriendly(null)
   }
 
   const handleSubmit = async () => {
@@ -98,6 +95,10 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
     if (rating === 0) return toast.error("Please add a star rating")
     if (moderation === "rejected") return toast.error("Please upload a toilet photo")
     if (moderation === "checking") return toast.error("Please wait — checking your photo")
+
+    // basic URL validation if provided
+    if (storeUrl && !storeUrl.startsWith("http")) return toast.error("Store URL must start with http:// or https://")
+    if (googleMapsUrl && !googleMapsUrl.startsWith("http")) return toast.error("Google Maps URL must start with http:// or https://")
 
     setLoading(true)
     try {
@@ -118,8 +119,10 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
         image_path: imagePath,
         caption: caption.trim() || null,
         rating,
-        store_name: null,
-        store_url: null,
+        store_name: storeName.trim() || null,
+        store_url: storeUrl.trim() || null,
+        address: address.trim() || null,
+        google_maps_url: googleMapsUrl.trim() || null,
         tags: [],
         moderation_status: "approved",
         has_adult_changing_station: hasAdultChangingStation,
@@ -143,10 +146,7 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={(v) => {
-      if (!loading && moderation !== "checking") {
-        onOpenChange(v)
-        if (!v) reset()
-      }
+      if (!loading && moderation !== "checking") { onOpenChange(v); if (!v) reset() }
     }}>
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -157,6 +157,7 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
         </DialogHeader>
 
         <div className="space-y-5">
+
           {/* info banner */}
           <div className="flex items-start gap-2.5 rounded-xl border border-sky-200/80 bg-sky-50/60 px-3.5 py-3 dark:border-sky-900/50 dark:bg-sky-950/30">
             <ShowerHead className="mt-0.5 h-4 w-4 shrink-0 text-sky-500" />
@@ -167,15 +168,12 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
 
           {/* ── Photo drop zone ── */}
           {!preview ? (
-            <div
-              {...getRootProps()}
-              className={cn(
-                "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer min-h-[200px] group",
-                isDragActive
-                  ? "border-sky-400 bg-sky-50 dark:bg-sky-950/30 scale-[1.02]"
-                  : "border-slate-200 hover:border-sky-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50",
-              )}
-            >
+            <div {...getRootProps()} className={cn(
+              "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer min-h-[200px] group",
+              isDragActive
+                ? "border-sky-400 bg-sky-50 dark:bg-sky-950/30 scale-[1.02]"
+                : "border-slate-200 hover:border-sky-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50",
+            )}>
               <input {...getInputProps()} />
               <div className="flex flex-col items-center gap-3 p-8 text-center">
                 <div className={cn(
@@ -199,17 +197,12 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
           ) : (
             <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
               <Image src={preview} alt="Preview" width={600} height={400} className="w-full object-cover max-h-64" />
-              <button
-                onClick={clearImage}
-                className="absolute top-2 right-2 rounded-lg bg-black/50 p-1.5 text-white hover:bg-black/70 transition-colors"
-              >
+              <button onClick={clearImage} className="absolute top-2 right-2 rounded-lg bg-black/50 p-1.5 text-white hover:bg-black/70 transition-colors">
                 <X className="h-4 w-4" />
               </button>
-              {/* moderation badge */}
               {moderation === "checking" && (
                 <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 text-xs text-white">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Checking photo...
+                  <Loader2 className="h-3 w-3 animate-spin" />Checking photo...
                 </div>
               )}
               {moderation === "approved" && (
@@ -232,21 +225,88 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
             <div className="flex items-center gap-3">
               <StarRating value={rating} onChange={setRating} size="lg" />
               {rating > 0 && (
-                <span className="text-sm text-slate-500 dark:text-slate-400">
-                  {RATING_LABELS[rating]}
-                </span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">{RATING_LABELS[rating]}</span>
               )}
             </div>
           </div>
 
-          {/* ── CHECKBOX 1: Adult Changing Station ── */}
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-2">
+          {/* ── Location section ── */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <MapPin className="h-4 w-4 text-sky-500" />
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Location Details</p>
+              <span className="text-xs text-slate-400">(optional)</span>
+            </div>
+
+            {/* Venue / store name */}
+            <div className="space-y-1.5">
+              <Label htmlFor="storeName" className="text-xs text-slate-500">Venue or business name</Label>
+              <div className="relative">
+                <ShoppingBag className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <Input
+                  id="storeName"
+                  placeholder="e.g. McDonald's Times Square, JFK Terminal B"
+                  value={storeName}
+                  onChange={(e) => setStoreName(e.target.value)}
+                  className="pl-8 text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="space-y-1.5">
+              <Label htmlFor="address" className="text-xs text-slate-500">Address</Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <Input
+                  id="address"
+                  placeholder="e.g. 123 Main St, New York, NY 10001"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="pl-8 text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Google Maps link */}
+            <div className="space-y-1.5">
+              <Label htmlFor="googleMapsUrl" className="text-xs text-slate-500">Google Maps link</Label>
+              <div className="relative">
+                <Link className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <Input
+                  id="googleMapsUrl"
+                  placeholder="https://maps.google.com/..."
+                  value={googleMapsUrl}
+                  onChange={(e) => setGoogleMapsUrl(e.target.value)}
+                  className="pl-8 text-sm"
+                />
+              </div>
+              <p className="text-xs text-slate-400">Open Google Maps → Share → Copy link → paste here</p>
+            </div>
+
+            {/* Website / store URL */}
+            <div className="space-y-1.5">
+              <Label htmlFor="storeUrl" className="text-xs text-slate-500">Venue website (optional)</Label>
+              <div className="relative">
+                <Link className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <Input
+                  id="storeUrl"
+                  placeholder="https://example.com"
+                  value={storeUrl}
+                  onChange={(e) => setStoreUrl(e.target.value)}
+                  className="pl-8 text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ── Adult Changing Station ── */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
             <button
               type="button"
               onClick={() => setHasAdultChangingStation(!hasAdultChangingStation)}
               className="flex items-center gap-3 w-full text-left group"
             >
-              {/* custom checkbox */}
               <div className={cn(
                 "h-5 w-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150",
                 hasAdultChangingStation
@@ -262,27 +322,20 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
               <div className="flex items-center gap-2 flex-1">
                 <Accessibility className="h-4 w-4 text-emerald-500 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                    Has Adult Changing Station
-                  </p>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Adult-sized changing table available (not just for children)
-                  </p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Has Adult Changing Station</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Adult-sized changing table available</p>
                 </div>
               </div>
             </button>
           </div>
 
-          {/* ── CHECKBOX 2: Family Friendly — Yes / No ── */}
+          {/* ── Family Friendly ── */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-sky-500" />
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                Would you bring your family here?
-              </p>
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Would you bring your family here?</p>
             </div>
             <div className="flex gap-3">
-              {/* Yes button */}
               <button
                 type="button"
                 onClick={() => setIsFamilyFriendly(isFamilyFriendly === true ? null : true)}
@@ -290,12 +343,11 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
                   "flex-1 rounded-xl border-2 py-2.5 text-sm font-medium transition-all duration-150",
                   isFamilyFriendly === true
                     ? "border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400"
-                    : "border-slate-200 dark:border-slate-700 text-slate-500 hover:border-sky-300 dark:hover:border-sky-700",
+                    : "border-slate-200 dark:border-slate-700 text-slate-500 hover:border-sky-300",
                 )}
               >
                 👨‍👩‍👧  Yes
               </button>
-              {/* No button */}
               <button
                 type="button"
                 onClick={() => setIsFamilyFriendly(isFamilyFriendly === false ? null : false)}
@@ -303,7 +355,7 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
                   "flex-1 rounded-xl border-2 py-2.5 text-sm font-medium transition-all duration-150",
                   isFamilyFriendly === false
                     ? "border-red-400 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                    : "border-slate-200 dark:border-slate-700 text-slate-500 hover:border-red-300 dark:hover:border-red-700",
+                    : "border-slate-200 dark:border-slate-700 text-slate-500 hover:border-red-300",
                 )}
               >
                 🚫  No
@@ -330,20 +382,14 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
           </div>
 
           {/* ── Submit ── */}
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitDisabled}
-            className="w-full h-11"
-          >
+          <Button onClick={handleSubmit} disabled={isSubmitDisabled} className="w-full h-11">
             {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Posting...
-              </>
+              <><Loader2 className="h-4 w-4 animate-spin" />Posting...</>
             ) : (
               "Post Review 🚽"
             )}
           </Button>
+
         </div>
       </DialogContent>
     </Dialog>

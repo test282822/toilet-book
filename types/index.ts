@@ -18,6 +18,8 @@ export interface Post {
   rating: number
   store_name: string | null
   store_url: string | null
+  address: string | null
+  google_maps_url: string | null
   tags: string[]
   likes_count: number
   moderation_status: string

@@ -51,22 +51,16 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-[var(--bg)]">
       <Navbar profile={profile} />
-      <HeroSection stats={stats} />
-
+      <HeroSection stats={stats} userId={user?.id} />
       <main className="flex-1 mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
-            Latest Reviews
-          </h2>
-          <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full px-2.5 py-1">
-            Updated live
-          </span>
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Latest Reviews</h2>
+          <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full px-2.5 py-1">Updated live</span>
         </div>
         <Suspense fallback={<FeedSkeleton />}>
           <PostFeed initialPosts={initialPosts} currentUserId={user?.id} />
         </Suspense>
       </main>
-
       <footer className="border-t border-slate-200/60 dark:border-slate-800/60 py-8 text-center">
         <p className="text-sm text-slate-400 flex items-center justify-center gap-1.5">
           <Toilet className="h-4 w-4 text-sky-400" />

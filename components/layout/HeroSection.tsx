@@ -1,6 +1,8 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { Plus } from "lucide-react"
+import { NewPostModal } from "@/components/feed/NewPostModal"
 
 interface HeroProps {
   stats: {
@@ -8,6 +10,7 @@ interface HeroProps {
     totalUsers: number
     totalAdultStations: number
   }
+  userId?: string
 }
 
 function formatCount(n: number): string {
@@ -33,9 +36,7 @@ const SAMPLE_CARDS = [
     name: "The Grand Hotel",
     location: "Manhattan, NY",
     stars: 5,
-    badges: [
-      { label: "🏆 Top rated", color: "rgba(129,140,248,0.2)", text: "#a5b4fc" },
-    ],
+    badges: [{ label: "🏆 Top rated", color: "rgba(129,140,248,0.2)", text: "#a5b4fc" }],
   },
   {
     emoji: "🍕",
@@ -43,9 +44,7 @@ const SAMPLE_CARDS = [
     name: "Joe's Pizzeria",
     location: "Brooklyn, NY",
     stars: 3,
-    badges: [
-      { label: "👨‍👩‍👧 Family OK", color: "rgba(56,189,248,0.2)", text: "#38bdf8" },
-    ],
+    badges: [{ label: "👨‍👩‍👧 Family OK", color: "rgba(56,189,248,0.2)", text: "#38bdf8" }],
   },
 ]
 
@@ -53,16 +52,7 @@ function StarRow({ count }: { count: number }) {
   return (
     <div style={{ display: "flex", gap: "3px" }}>
       {[1, 2, 3, 4, 5].map((s) => (
-        <div
-          key={s}
-          style={{
-            width: 9,
-            height: 9,
-            background: s <= count ? "#fbbf24" : "#1e293b",
-            clipPath:
-              "polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)",
-          }}
-        />
+        <div key={s} style={{ width: 9, height: 9, background: s <= count ? "#fbbf24" : "#1e293b", clipPath: "polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)" }} />
       ))}
     </div>
   )
@@ -84,7 +74,37 @@ function AnimatedCount({ target }: { target: number }) {
   return <span>{formatCount(val)}</span>
 }
 
-export function HeroSection({ stats }: HeroProps) {
+// ── Logged-IN hero: minimal, clean, just a post button ──────────────────────
+function LoggedInHero({ userId }: { userId: string }) {
+  const [modalOpen, setModalOpen] = useState(false)
+  return (
+    <>
+      <section className="border-b border-slate-200/60 dark:border-slate-800/60 bg-gradient-to-r from-sky-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 py-6 px-4">
+        <div className="mx-auto max-w-6xl flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+              Welcome back 🚽
+            </h1>
+            <p className="text-sm text-slate-400 mt-0.5">
+              What toilet are you reviewing today?
+            </p>
+          </div>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-sky-500/20 hover:shadow-lg hover:shadow-sky-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+          >
+            <Plus className="h-4 w-4" />
+            Post a Review
+          </button>
+        </div>
+      </section>
+      <NewPostModal open={modalOpen} onOpenChange={setModalOpen} userId={userId} />
+    </>
+  )
+}
+
+// ── Logged-OUT hero: full dark cinematic experience ──────────────────────────
+function LoggedOutHero({ stats }: { stats: HeroProps["stats"] }) {
   const heroRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
   const router = useRouter()
@@ -98,8 +118,7 @@ export function HeroSection({ stats }: HeroProps) {
       const dy = (e.clientY - rect.top) / rect.height - 0.5
       cardsRef.current.forEach((card, i) => {
         if (!card) return
-        const factors = [1.3, 0.7, 1.3]
-        const f = factors[i] ?? 1
+        const f = [1.3, 0.7, 1.3][i] ?? 1
         card.style.transform = `perspective(700px) rotateX(${-dy * 10 * f}deg) rotateY(${dx * 14 * f}deg) translateY(-6px)`
       })
     }
@@ -119,7 +138,6 @@ export function HeroSection({ stats }: HeroProps) {
     }
   }, [])
 
-  // generate stars once
   const stars = Array.from({ length: 90 }, (_, i) => ({
     id: i,
     size: Math.random() * 2.5 + 0.5,
@@ -144,89 +162,51 @@ export function HeroSection({ stats }: HeroProps) {
         padding: "80px 24px 48px",
       }}
     >
-      {/* ── Ambient glow blobs ── */}
+      {/* glow blobs */}
       <div style={{ position: "absolute", top: -80, left: -80, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(14,165,233,0.18) 0%, transparent 70%)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: -100, right: -60, width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 70%)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", top: "40%", left: "40%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
 
-      {/* ── Star field ── */}
+      {/* star field */}
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         {stars.map((s) => (
-          <div
-            key={s.id}
-            style={{
-              position: "absolute",
-              width: s.size,
-              height: s.size,
-              borderRadius: "50%",
-              background: "#fff",
-              left: `${s.left}%`,
-              top: `${s.top}%`,
-              animation: `tbTwinkle ${s.duration}s ${s.delay}s infinite ease-in-out`,
-              opacity: 0.3,
-            }}
-          />
+          <div key={s.id} style={{ position: "absolute", width: s.size, height: s.size, borderRadius: "50%", background: "#fff", left: `${s.left}%`, top: `${s.top}%`, animation: `tbTwinkle ${s.duration}s ${s.delay}s infinite ease-in-out`, opacity: 0.3 }} />
         ))}
       </div>
 
       <style>{`
-        @keyframes tbTwinkle {
-          0%,100%{opacity:0.15;transform:scale(1)}
-          50%{opacity:0.9;transform:scale(1.4)}
-        }
-        @keyframes tbPulse {
-          0%,100%{opacity:1;transform:scale(1)}
-          50%{opacity:0.4;transform:scale(0.7)}
-        }
-        @keyframes tbFloat {
-          0%,100%{transform:translateY(0px)}
-          50%{transform:translateY(-8px)}
-        }
-        .tb-card {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.09);
-          border-radius: 16px;
-          padding: 14px;
-          width: 168px;
-          transition: transform 0.25s ease, border-color 0.2s;
-          cursor: pointer;
-          flex-shrink: 0;
-        }
-        .tb-card:hover {
-          border-color: rgba(56,189,248,0.45);
-        }
-        .tb-badge {
-          display:inline-block;
-          font-size:9px;
-          padding:2px 7px;
-          border-radius:6px;
-          margin-right:3px;
-          margin-top:4px;
-          line-height:1.6;
-        }
+        @keyframes tbTwinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:.9;transform:scale(1.4)}}
+        @keyframes tbPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+        .tb-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:14px;width:168px;transition:transform .25s ease,border-color .2s;cursor:pointer;flex-shrink:0;}
+        .tb-card:hover{border-color:rgba(56,189,248,.45);}
+        .tb-badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:6px;margin-right:3px;margin-top:4px;line-height:1.6;}
+        .tb-btn-primary{background:linear-gradient(135deg,#0ea5e9,#6366f1);border:none;border-radius:12px;padding:11px 26px;font-size:14px;font-weight:500;color:#fff;cursor:pointer;transition:opacity .15s;}
+        .tb-btn-primary:hover{opacity:.88;}
+        .tb-btn-outline{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:11px 26px;font-size:14px;color:#e2e8f0;cursor:pointer;transition:background .15s;}
+        .tb-btn-outline:hover{background:rgba(255,255,255,.1);}
       `}</style>
 
-      {/* ── Live badge ── */}
+      {/* live badge */}
       <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(56,189,248,0.12)", border: "1px solid rgba(56,189,248,0.25)", borderRadius: 20, padding: "4px 14px", fontSize: 12, color: "#38bdf8", marginBottom: 20, position: "relative", zIndex: 2 }}>
         <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#38bdf8", animation: "tbPulse 2s infinite" }} />
         World&apos;s #1 toilet rating community
       </div>
 
-      {/* ── Headline ── */}
+      {/* headline */}
       <h1 style={{ fontSize: "clamp(30px, 5vw, 52px)", fontWeight: 500, color: "#fff", textAlign: "center", lineHeight: 1.12, marginBottom: 16, position: "relative", zIndex: 2, maxWidth: 600 }}>
         Find the{" "}
-        <span style={{ background: "linear-gradient(90deg, #38bdf8, #818cf8, #c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+        <span style={{ background: "linear-gradient(90deg,#38bdf8,#818cf8,#c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
           best toilet
         </span>{" "}
         near you
       </h1>
 
-      {/* ── Subheading ── */}
+      {/* subheading */}
       <p style={{ fontSize: 15, color: "#94a3b8", textAlign: "center", maxWidth: 440, lineHeight: 1.7, marginBottom: 32, position: "relative", zIndex: 2 }}>
         Real ratings. Real reviews. Discover clean, accessible bathrooms — including adult changing stations — everywhere you go.
       </p>
 
-      {/* ── Live stats ── */}
+      {/* stats */}
       <div style={{ display: "flex", gap: 32, marginBottom: 40, position: "relative", zIndex: 2, flexWrap: "wrap", justifyContent: "center" }}>
         {[
           { emoji: "🚽", label: "Toilets rated", value: stats.totalPosts },
@@ -241,63 +221,47 @@ export function HeroSection({ stats }: HeroProps) {
             <div style={{ fontSize: 11, color: "#475569", marginTop: 3 }}>{label}</div>
           </div>
         ))}
-        {/* dividers */}
       </div>
 
-      {/* ── 3D Cards ── */}
+      {/* 3D cards */}
       <div style={{ display: "flex", gap: 14, marginBottom: 36, position: "relative", zIndex: 2, flexWrap: "wrap", justifyContent: "center" }}>
         {SAMPLE_CARDS.map((card, i) => (
           <div
             key={i}
             ref={(el) => { cardsRef.current[i] = el }}
             className="tb-card"
-            style={{
-              transform: `perspective(700px) rotateX(${[5, 2, 5][i]}deg) rotateY(${[10, 0, -10][i]}deg)`,
-            }}
+            style={{ transform: `perspective(700px) rotateX(${[5,2,5][i]}deg) rotateY(${[10,0,-10][i]}deg)` }}
           >
-            {/* icon */}
             <div style={{ width: "100%", height: 64, borderRadius: 10, background: card.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, marginBottom: 10 }}>
               {card.emoji}
             </div>
-            {/* name */}
-            <div style={{ fontSize: 11, fontWeight: 500, color: "#e2e8f0", marginBottom: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {card.name}
-            </div>
-            {/* location */}
+            <div style={{ fontSize: 11, fontWeight: 500, color: "#e2e8f0", marginBottom: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{card.name}</div>
             <div style={{ fontSize: 10, color: "#475569", marginBottom: 6 }}>{card.location}</div>
-            {/* stars */}
             <StarRow count={card.stars} />
-            {/* badges */}
             <div>
               {card.badges.map((b, j) => (
-                <span key={j} className="tb-badge" style={{ background: b.color, color: b.text }}>
-                  {b.label}
-                </span>
+                <span key={j} className="tb-badge" style={{ background: b.color, color: b.text }}>{b.label}</span>
               ))}
             </div>
           </div>
         ))}
       </div>
 
-      {/* ── CTAs ── */}
+      {/* CTAs */}
       <div style={{ display: "flex", gap: 12, position: "relative", zIndex: 2, flexWrap: "wrap", justifyContent: "center" }}>
-        <button
-          onClick={() => router.push("/signup")}
-          style={{ background: "linear-gradient(135deg, #0ea5e9, #6366f1)", border: "none", borderRadius: 12, padding: "11px 26px", fontSize: 14, fontWeight: 500, color: "#fff", cursor: "pointer", transition: "opacity 0.15s" }}
-          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
-          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-        >
+        <button className="tb-btn-primary" onClick={() => router.push("/signup")}>
           Start rating toilets 🚽
         </button>
-        <button
-          onClick={() => router.push("/login")}
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "11px 26px", fontSize: 14, color: "#e2e8f0", cursor: "pointer", transition: "background 0.15s" }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
-        >
+        <button className="tb-btn-outline" onClick={() => router.push("/login")}>
           Sign in
         </button>
       </div>
     </section>
   )
+}
+
+// ── Main export — switches based on auth state ───────────────────────────────
+export function HeroSection({ stats, userId }: HeroProps) {
+  if (userId) return <LoggedInHero userId={userId} />
+  return <LoggedOutHero stats={stats} />
 }
