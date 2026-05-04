@@ -1,19 +1,14 @@
 "use client"
-
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useDropzone } from "react-dropzone"
 import Image from "next/image"
 import {
-  Upload, ImagePlus, X, ShoppingBag, Loader2,
-  Sparkles, ScanSearch, ShowerHead, AlertTriangle, CheckCircle2,
+  Upload, ImagePlus, X, Loader2,
+  Sparkles, ShowerHead, AlertTriangle, Accessibility, Users,
 } from "lucide-react"
-
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { StarRating } from "@/components/feed/StarRating"
@@ -27,8 +22,7 @@ interface NewPostModalProps {
   userId: string
 }
 
-const STORE_PRESETS = ["Amazon", "Home Depot", "Lowe's", "Wayfair", "IKEA", "Target"]
-const RATING_LABELS = ["", "Disappointing", "Okay", "Good", "Great", "Dream bathroom!"]
+const RATING_LABELS = ["", "Disgusting 🤢", "Not great", "Decent", "Pretty clean!", "Spotless! 🏆"]
 
 type ModerationState = "idle" | "checking" | "approved" | "rejected"
 
@@ -38,9 +32,8 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
   const [preview, setPreview] = useState<string | null>(null)
   const [caption, setCaption] = useState("")
   const [rating, setRating] = useState(0)
-  const [storeName, setStoreName] = useState("")
-  const [storeUrl, setStoreUrl] = useState("")
-  const [tags, setTags] = useState("")
+  const [hasAdultChangingStation, setHasAdultChangingStation] = useState(false)
+  const [isFamilyFriendly, setIsFamilyFriendly] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(false)
   const [moderation, setModeration] = useState<ModerationState>("idle")
   const [moderationReason, setModerationReason] = useState("")
@@ -51,11 +44,6 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
       const fd = new FormData()
       fd.append("image", f)
       const res = await fetch("/api/moderate", { method: "POST", body: fd })
-      if (!res.ok) {
-        // Non-2xx from our own API — treat as approved to avoid blocking valid posts
-        setModeration("approved")
-        return true
-      }
       const json = await res.json() as { approved: boolean; reason: string }
       if (json.approved) {
         setModeration("approved")
@@ -66,7 +54,6 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
         return false
       }
     } catch {
-      // Network error — fail open so users aren't silently blocked
       setModeration("approved")
       return true
     }
@@ -87,11 +74,7 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
     accept: { "image/*": [".jpg", ".jpeg", ".png", ".webp"] },
     maxFiles: 1,
     maxSize: 20 * 1024 * 1024,
-    onDropRejected: (rejected) => {
-      const err = rejected[0]?.errors[0]
-      if (err?.code === "file-too-large") toast.error("Image must be under 20 MB")
-      else toast.error("Please upload a JPG, PNG, or WebP image")
-    },
+    onDropRejected: () => toast.error("Image must be under 20 MB"),
   })
 
   const clearImage = () => {
@@ -106,42 +89,28 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
     clearImage()
     setCaption("")
     setRating(0)
-    setStoreName("")
-    setStoreUrl("")
-    setTags("")
+    setHasAdultChangingStation(false)
+    setIsFamilyFriendly(null)
   }
 
   const handleSubmit = async () => {
     if (!file) return toast.error("Please choose a photo")
-    if (moderation === "checking") return toast.error("Please wait — checking your image")
-    if (moderation === "rejected") return toast.error("Please upload a bathroom photo")
-    if (rating === 0) return toast.error("Please give it a star rating")
+    if (rating === 0) return toast.error("Please add a star rating")
+    if (moderation === "rejected") return toast.error("Please upload a toilet photo")
+    if (moderation === "checking") return toast.error("Please wait — checking your photo")
 
     setLoading(true)
     try {
       const supabase = createClient()
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg"
+      const ext = file.name.split(".").pop() || "jpg"
       const imagePath = `${userId}/${Date.now()}.${ext}`
 
       const { error: uploadError } = await supabase.storage
         .from("bathroom-pics")
         .upload(imagePath, file, { cacheControl: "3600", upsert: false })
+      if (uploadError) throw uploadError
 
-      if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`)
-
-      const { data: urlData } = supabase.storage
-        .from("bathroom-pics")
-        .getPublicUrl(imagePath)
-
-      const tagArray = tags
-        .split(",")
-        .map((t) => t.trim().toLowerCase())
-        .filter((t) => t.length > 0 && t.length <= 30)
-
-      const normalizedStoreUrl =
-        storeUrl.trim() && !storeUrl.trim().startsWith("http")
-          ? `https://${storeUrl.trim()}`
-          : storeUrl.trim() || null
+      const { data: urlData } = supabase.storage.from("bathroom-pics").getPublicUrl(imagePath)
 
       const { error: insertError } = await supabase.from("posts").insert({
         user_id: userId,
@@ -149,70 +118,59 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
         image_path: imagePath,
         caption: caption.trim() || null,
         rating,
-        store_name: storeName.trim() || null,
-        store_url: normalizedStoreUrl,
-        tags: tagArray,
+        store_name: null,
+        store_url: null,
+        tags: [],
         moderation_status: "approved",
+        has_adult_changing_station: hasAdultChangingStation,
+        is_family_friendly: isFamilyFriendly,
       })
+      if (insertError) throw insertError
 
-      if (insertError) throw new Error(insertError.message)
-
-      toast.success("Your bathroom vibe is live!")
+      toast.success("Your toilet review is live! 🚽")
       reset()
       onOpenChange(false)
       router.refresh()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong — please try again")
+      toast.error(err instanceof Error ? err.message : "Something went wrong")
     } finally {
       setLoading(false)
     }
   }
 
-  const toggleStorePreset = (name: string) => {
-    setStoreName((prev) => (prev === name ? "" : name))
-  }
-
   const isSubmitDisabled =
-    loading ||
-    !file ||
-    moderation === "checking" ||
-    moderation === "rejected" ||
-    (!!file && moderation === "idle") ||
-    rating === 0
+    loading || !file || rating === 0 || moderation === "checking" || moderation === "rejected"
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        if (!loading && moderation !== "checking") {
-          onOpenChange(v)
-          if (!v) reset()
-        }
-      }}
-    >
+    <Dialog open={open} onOpenChange={(v) => {
+      if (!loading && moderation !== "checking") {
+        onOpenChange(v)
+        if (!v) reset()
+      }
+    }}>
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Sparkles className="h-5 w-5 text-sky-500" />
-            Share Your Bathroom Vibe
+            Rate This Toilet
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5">
-          {/* Info banner */}
+          {/* info banner */}
           <div className="flex items-start gap-2.5 rounded-xl border border-sky-200/80 bg-sky-50/60 px-3.5 py-3 dark:border-sky-900/50 dark:bg-sky-950/30">
             <ShowerHead className="mt-0.5 h-4 w-4 shrink-0 text-sky-500" />
             <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              Only post photos of bathrooms. Our AI checks every upload.
+              Only post photos of toilets or bathrooms. Our AI checks every upload.
             </p>
           </div>
 
-          {/* Drop zone / preview */}
+          {/* ── Photo drop zone ── */}
           {!preview ? (
             <div
               {...getRootProps()}
               className={cn(
-                "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer min-h-[220px] group",
+                "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer min-h-[200px] group",
                 isDragActive
                   ? "border-sky-400 bg-sky-50 dark:bg-sky-950/30 scale-[1.02]"
                   : "border-slate-200 hover:border-sky-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50",
@@ -222,190 +180,172 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
               <div className="flex flex-col items-center gap-3 p-8 text-center">
                 <div className={cn(
                   "flex h-14 w-14 items-center justify-center rounded-2xl transition-all duration-200",
-                  isDragActive
-                    ? "bg-sky-100 dark:bg-sky-900/50"
-                    : "bg-slate-100 group-hover:bg-sky-100 dark:bg-slate-800 dark:group-hover:bg-sky-900/30",
+                  isDragActive ? "bg-sky-100 dark:bg-sky-900/50" : "bg-slate-100 group-hover:bg-sky-50 dark:bg-slate-800",
                 )}>
-                  {isDragActive
-                    ? <Upload className="h-6 w-6 text-sky-500" />
-                    : <ImagePlus className="h-6 w-6 text-slate-400 group-hover:text-sky-500 transition-colors" />
-                  }
+                  <ImagePlus className={cn("h-6 w-6 transition-colors", isDragActive ? "text-sky-500" : "text-slate-400 group-hover:text-sky-400")} />
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-700 dark:text-slate-300">
-                    {isDragActive ? "Drop it here!" : "Drag & drop your photo"}
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {isDragActive ? "Drop your photo here" : "Upload a toilet photo"}
                   </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    or click to browse · JPG, PNG, WebP · max 20 MB
-                  </p>
+                  <p className="text-xs text-slate-400 mt-1">JPG, PNG, WEBP · Max 20 MB</p>
+                </div>
+                <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-xs font-medium text-white">
+                  <Upload className="h-3.5 w-3.5" />
+                  Choose photo
                 </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              <div className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 aspect-[4/3]">
-                <Image src={preview} alt="Preview" fill className="object-cover" />
-                {!loading && (
-                  <button
-                    onClick={clearImage}
-                    className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors backdrop-blur-sm"
-                    aria-label="Remove image"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-                <div className="absolute bottom-2 left-2 rounded-lg bg-black/40 px-2 py-0.5 text-xs text-white backdrop-blur-sm">
-                  {file !== null ? (file.size / 1024 / 1024).toFixed(1) : '0'} MB
+            <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+              <Image src={preview} alt="Preview" width={600} height={400} className="w-full object-cover max-h-64" />
+              <button
+                onClick={clearImage}
+                className="absolute top-2 right-2 rounded-lg bg-black/50 p-1.5 text-white hover:bg-black/70 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              {/* moderation badge */}
+              {moderation === "checking" && (
+                <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 text-xs text-white">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Checking photo...
                 </div>
-              </div>
-              <ModerationBadge state={moderation} reason={moderationReason} />
+              )}
+              {moderation === "approved" && (
+                <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-lg bg-emerald-500/90 px-2.5 py-1.5 text-xs text-white">
+                  ✓ Photo approved
+                </div>
+              )}
+              {moderation === "rejected" && (
+                <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-lg bg-red-500/90 px-2.5 py-1.5 text-xs text-white">
+                  <AlertTriangle className="h-3 w-3" />
+                  {moderationReason || "Please upload a toilet photo"}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Caption */}
-          <div className="space-y-1.5">
-            <Label htmlFor="caption">Caption</Label>
-            <Textarea
-              id="caption"
-              placeholder="Describe the vibe... marble counters? rain shower? spill it ✨"
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              maxLength={500}
-              rows={3}
-            />
-            <p className={cn(
-              "text-right text-xs transition-colors",
-              caption.length >= 480 ? "text-amber-500" : "text-slate-400",
-            )}>
-              {caption.length}/500
-            </p>
-          </div>
-
-          {/* Rating */}
-          <div className="space-y-1.5">
-            <Label>
-              Your Rating <span className="text-red-400">*</span>
-            </Label>
+          {/* ── Star rating ── */}
+          <div className="space-y-2">
+            <Label>Overall Cleanliness Rating</Label>
             <div className="flex items-center gap-3">
               <StarRating value={rating} onChange={setRating} size="lg" />
               {rating > 0 && (
-                <span className="text-sm text-slate-500 dark:text-slate-400 animate-in fade-in duration-150">
+                <span className="text-sm text-slate-500 dark:text-slate-400">
                   {RATING_LABELS[rating]}
                 </span>
               )}
             </div>
           </div>
 
-          {/* Store link */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-1.5">
-              <ShoppingBag className="h-4 w-4 text-slate-400" />
-              Product / Store Link{" "}
-              <span className="font-normal text-slate-400">(optional)</span>
-            </Label>
-            <div className="flex flex-wrap gap-1.5">
-              {STORE_PRESETS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => toggleStorePreset(s)}
-                  className={cn(
-                    "rounded-full px-3 py-1 text-xs font-medium transition-all border",
-                    storeName === s
-                      ? "bg-sky-500 text-white border-sky-500 shadow-sm"
-                      : "bg-white text-slate-600 border-slate-200 hover:border-sky-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:border-sky-700",
-                  )}
-                >
-                  {storeName === s ? "✓ " : ""}{s}
-                </button>
-              ))}
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                placeholder="Store name"
-                value={storeName}
-                onChange={(e) => setStoreName(e.target.value)}
-              />
-              <Input
-                placeholder="https://..."
-                value={storeUrl}
-                onChange={(e) => setStoreUrl(e.target.value)}
-                type="url"
-              />
-            </div>
+          {/* ── CHECKBOX 1: Adult Changing Station ── */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-2">
+            <button
+              type="button"
+              onClick={() => setHasAdultChangingStation(!hasAdultChangingStation)}
+              className="flex items-center gap-3 w-full text-left group"
+            >
+              {/* custom checkbox */}
+              <div className={cn(
+                "h-5 w-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150",
+                hasAdultChangingStation
+                  ? "bg-emerald-500 border-emerald-500"
+                  : "border-slate-300 dark:border-slate-600 group-hover:border-emerald-400",
+              )}>
+                {hasAdultChangingStation && (
+                  <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-1">
+                <Accessibility className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                    Has Adult Changing Station
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Adult-sized changing table available (not just for children)
+                  </p>
+                </div>
+              </div>
+            </button>
           </div>
 
-          {/* Tags */}
+          {/* ── CHECKBOX 2: Family Friendly — Yes / No ── */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-sky-500" />
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                Would you bring your family here?
+              </p>
+            </div>
+            <div className="flex gap-3">
+              {/* Yes button */}
+              <button
+                type="button"
+                onClick={() => setIsFamilyFriendly(isFamilyFriendly === true ? null : true)}
+                className={cn(
+                  "flex-1 rounded-xl border-2 py-2.5 text-sm font-medium transition-all duration-150",
+                  isFamilyFriendly === true
+                    ? "border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400"
+                    : "border-slate-200 dark:border-slate-700 text-slate-500 hover:border-sky-300 dark:hover:border-sky-700",
+                )}
+              >
+                👨‍👩‍👧  Yes
+              </button>
+              {/* No button */}
+              <button
+                type="button"
+                onClick={() => setIsFamilyFriendly(isFamilyFriendly === false ? null : false)}
+                className={cn(
+                  "flex-1 rounded-xl border-2 py-2.5 text-sm font-medium transition-all duration-150",
+                  isFamilyFriendly === false
+                    ? "border-red-400 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                    : "border-slate-200 dark:border-slate-700 text-slate-500 hover:border-red-300 dark:hover:border-red-700",
+                )}
+              >
+                🚫  No
+              </button>
+            </div>
+            {isFamilyFriendly === null && (
+              <p className="text-xs text-slate-400">Optional — skip if unsure</p>
+            )}
+          </div>
+
+          {/* ── Caption ── */}
           <div className="space-y-1.5">
-            <Label htmlFor="tags">
-              Tags{" "}
-              <span className="font-normal text-slate-400">(optional, comma-separated)</span>
-            </Label>
-            <Input
-              id="tags"
-              placeholder="modern, marble, walk-in shower, freestanding tub"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
+            <Label htmlFor="caption">Caption (optional)</Label>
+            <Textarea
+              id="caption"
+              placeholder="Describe this toilet... smell, paper quality, privacy?"
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              maxLength={300}
+              rows={3}
+              className="resize-none"
             />
+            <p className="text-right text-xs text-slate-400">{caption.length}/300</p>
           </div>
 
-          {/* Submit */}
+          {/* ── Submit ── */}
           <Button
-            className="w-full h-12 text-base"
             onClick={handleSubmit}
             disabled={isSubmitDisabled}
+            className="w-full h-11"
           >
             {loading ? (
-              <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Posting...</>
-            ) : moderation === "checking" ? (
-              <><ScanSearch className="h-4 w-4 animate-pulse mr-2" /> Checking image...</>
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Posting...
+              </>
             ) : (
-              <><Sparkles className="h-4 w-4 mr-2" /> Post to Toilet Book</>
+              "Post Review 🚽"
             )}
           </Button>
         </div>
       </DialogContent>
     </Dialog>
-  )
-}
-
-function ModerationBadge({ state, reason }: { state: ModerationState; reason: string }) {
-  if (state === "idle") return null
-
-  if (state === "checking") return (
-    <div className="flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 dark:border-sky-900/50 dark:bg-sky-950/30">
-      <ScanSearch className="h-4 w-4 animate-pulse text-sky-500 shrink-0" />
-      <p className="text-xs font-medium text-sky-700 dark:text-sky-400">
-        Checking that this is a bathroom photo…
-      </p>
-    </div>
-  )
-
-  if (state === "approved") return (
-    <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-      <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-        Looks like a bathroom — good to go!
-      </p>
-    </div>
-  )
-
-  return (
-    <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 dark:border-red-900/50 dark:bg-red-950/30">
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
-      <div>
-        <p className="text-xs font-semibold text-red-700 dark:text-red-400">
-          This doesn&apos;t look like a bathroom photo.
-        </p>
-        <p className="mt-0.5 text-xs text-red-600/80 dark:text-red-400/70">
-          Please upload only bathroom images.
-        </p>
-        {reason && (
-          <p className="mt-1 text-xs italic text-red-500/70 dark:text-red-400/50">
-            AI note: {reason}
-          </p>
-        )}
-      </div>
-    </div>
   )
 }

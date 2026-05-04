@@ -19,8 +19,10 @@ export interface Post {
   store_name: string | null
   store_url: string | null
   tags: string[]
-likes_count: number
+  likes_count: number
   moderation_status: string
+  has_adult_changing_station: boolean
+  is_family_friendly: boolean | null
   created_at: string
   updated_at: string
   profiles?: Profile
