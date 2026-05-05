@@ -15,17 +15,22 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: {
-    default: "Toilet Book",
-    template: "%s · Toilet Book",
-  },
-  description:
-    "Discover and share stunning bathroom inspiration. Rate products, find stores, and vibe with the community.",
-  keywords: ["bathroom design", "bathroom inspiration", "interior design", "home decor"],
+  title: { default: "Toilet Book", template: "%s · Toilet Book" },
+  description: "Rate, review and discover toilets everywhere. The world's #1 toilet rating community.",
+  metadataBase: new URL("https://toilet-book.com"),
   openGraph: {
     title: "Toilet Book",
-    description: "Rate, Review and Discover The Cleantest bathrooms.",
+    description: "Find clean, accessible bathrooms near you.",
+    url: "https://toilet-book.com",
+    siteName: "Toilet Book",
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Toilet Book",
+    description: "Find clean, accessible bathrooms near you.",
+    images: ["/opengraph-image.png"],
   },
 }
 
