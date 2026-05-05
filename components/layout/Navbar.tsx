@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { Droplets, Plus, LogIn, LogOut, User, Menu, X } from "lucide-react"
+import { Droplets, Plus, LogIn, LogOut, User, Menu, X,Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
@@ -11,6 +11,7 @@ import { NewPostModal } from "@/components/feed/NewPostModal"
 import { createClient } from "@/lib/supabase/client"
 import type { Profile } from "@/types"
 import toast from "react-hot-toast"
+
 
 interface NavbarProps {
   profile: Profile | null
