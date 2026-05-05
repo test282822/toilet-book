@@ -11,7 +11,6 @@ import { NewPostModal } from "@/components/feed/NewPostModal"
 import { createClient } from "@/lib/supabase/client"
 import type { Profile } from "@/types"
 import toast from "react-hot-toast"
-import { Plus, Menu, X, LogIn, LogOut, User, Zap } from "lucide-react"
 
 interface NavbarProps {
   profile: Profile | null
