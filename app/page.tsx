@@ -5,6 +5,7 @@ import { PostFeed } from "@/components/feed/PostFeed"
 import { getFeedPosts } from "@/lib/posts"
 import { createClient } from "@/lib/supabase/server"
 import { HeroSection } from "@/components/layout/HeroSection"
+import { MobileHero } from "@/components/layout/MobileHero"
 
 export const dynamic = "force-dynamic"
 
@@ -17,42 +18,30 @@ async function getStats() {
   ] = await Promise.all([
     supabase.from("posts").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase
-      .from("posts")
-      .select("*", { count: "exact", head: true })
-      .eq("has_adult_changing_station", true),
+    supabase.from("posts").select("*", { count: "exact", head: true }).eq("has_adult_changing_station", true),
   ])
-  return {
-    totalPosts: totalPosts ?? 0,
-    totalUsers: totalUsers ?? 0,
-    totalAdultStations: totalAdultStations ?? 0,
-  }
+  return { totalPosts: totalPosts ?? 0, totalUsers: totalUsers ?? 0, totalAdultStations: totalAdultStations ?? 0 }
 }
 
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   let profile = null
   if (user) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single()
+    const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single()
     profile = data
   }
-
-  const [initialPosts, stats] = await Promise.all([
-    getFeedPosts(0, user?.id),
-    getStats(),
-  ])
-
+  const [initialPosts, stats] = await Promise.all([getFeedPosts(0, user?.id), getStats()])
   return (
     <div className="flex flex-col min-h-screen bg-[var(--bg)]">
       <Navbar profile={profile} />
-      <HeroSection stats={stats} userId={user?.id} />
-      <main className="flex-1 mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      <div className="block md:hidden">
+        <MobileHero isLoggedIn={!!user} userId={user?.id} stats={stats} />
+      </div>
+      <div className="hidden md:block">
+        <HeroSection stats={stats} userId={user?.id} />
+      </div>
+      <main className="flex-1 mx-auto w-full max-w-6xl px-4 py-8 sm:px-6" style={{ paddingBottom: user ? "100px" : undefined }}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Latest Reviews</h2>
           <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full px-2.5 py-1">Updated live</span>
@@ -61,7 +50,7 @@ export default async function HomePage() {
           <PostFeed initialPosts={initialPosts} currentUserId={user?.id} />
         </Suspense>
       </main>
-      <footer className="border-t border-slate-200/60 dark:border-slate-800/60 py-8 text-center">
+      <footer className="border-t border-slate-200/60 dark:border-slate-800/60 py-8 text-center hidden md:block">
         <p className="text-sm text-slate-400 flex items-center justify-center gap-1.5">
           <Toilet className="h-4 w-4 text-sky-400" />
           Toilet Book — rating the world&apos;s restrooms, one flush at a time
