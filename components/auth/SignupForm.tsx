@@ -157,9 +157,9 @@ export function SignupForm() {
 
       <p className="text-center text-xs" style={{ color: "#475569" }}>
         By joining you agree to our{" "}
-        <span className="text-sky-500 cursor-pointer hover:text-sky-400">Terms</span>{" "}
+        <a href="/terms" className="text-sky-500 hover:text-sky-400 transition-colors">Terms of Service</a>{" "}
         &{" "}
-        <span className="text-sky-500 cursor-pointer hover:text-sky-400">Privacy Policy</span>
+        <a href="/privacy" className="text-sky-500 hover:text-sky-400 transition-colors">Privacy Policy</a>
       </p>
     </form>
   )
