@@ -11,6 +11,7 @@ import { NewPostModal } from "@/components/feed/NewPostModal"
 import { createClient } from "@/lib/supabase/client"
 import type { Profile } from "@/types"
 import toast from "react-hot-toast"
+import { Plus, Menu, X, LogIn, LogOut, User, Zap } from "lucide-react"
 
 interface NavbarProps {
   profile: Profile | null
@@ -47,6 +48,10 @@ export function Navbar({ profile }: NavbarProps) {
 
           {/* Desktop actions */}
           <div className="hidden sm:flex items-center gap-3">
+            <Link href="/points" className="flex items-center gap-1.5 text-sm text-slate-600 hover:text-sky-500 dark:text-slate-400 dark:hover:text-sky-400 transition-colors">
+  <Zap className="h-4 w-4 text-amber-400" />
+  FLUSH
+</Link>
             <ThemeToggle />
             {profile ? (
               <>
