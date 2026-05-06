@@ -111,7 +111,7 @@ borderRadius: 20, padding: "4px 14px", fontSize: 12, color: "#38bdf8",
 marginBottom: 20, position: "relative", zIndex: 2,
 marginTop: isLoggedIn ? 0 : 60,
 }}>
-<div style={{ width: 6, height: 6, borderRadius: "50%", background: "#38bdf8", anim
+<div style={{ width: 6, height: 6, borderRadius: "50%", background: "#38bdf8", animation: "tbPulse 2s infinite" }} />
 World's #1 toilet rating app
 </div>
 {/* Headline */}
