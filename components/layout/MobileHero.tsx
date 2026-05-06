@@ -69,9 +69,8 @@ opacity: 0.4,
 }} />
 ))}
 </div>
-{/* Glow blobs */}
-<div style={{ position: "absolute", top: -60, left: -60, width: 280, height: 280, bor
-<div style={{ position: "absolute", bottom: -80, right: -40, width: 320, height: 320,
+{/* Glow blobs */}<div style={{ position: "absolute", top: -60, left: -60, width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, rgba(14,165,233,0.2) 0%, transparent 70%)", pointerEvents: "none" }} />
+<div style={{ position: "absolute", bottom: -80, right: -40, width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%)", pointerEvents: "none" }} />
 <style>{`
 @keyframes tbTwinkle { 0%,100%{opacity:.1;transform:scale(1)} 50%{opacity:.8;transf
 @keyframes tbPulse { 0%,100%{opacity:1} 50%{opacity:.3} }
