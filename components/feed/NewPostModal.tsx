@@ -210,34 +210,64 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
 
       if (insertError) throw insertError
 
-      // ── Auto-create / link map pin if we have GPS ─────────────
-      if (newPost?.id && gpsLat !== null && gpsLng !== null) {
-        const { data: toiletData, error: toiletError } = await supabase.rpc(
-          'upsert_toilet_from_post',
-          {
-            p_post_id:    newPost.id,
-            p_user_id:    userId,
-            p_lat:        gpsLat,
-            p_lng:        gpsLng,
-            p_name:       storeName.trim() || null,
-            p_address:    address.trim() || null,
-            p_city:       null,
-            p_venue_type: 'public',
+      // ── Auto-create / link map pin ─────────────────────────────
+      // Priority: GPS coords > geocoded address > geocoded venue name
+      let pinLat = gpsLat
+      let pinLng = gpsLng
+
+      // Geocode typed address if no GPS
+      if ((pinLat === null || pinLng === null) && address.trim()) {
+        try {
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address.trim())}&format=json&limit=1`,
+            { headers: { 'User-Agent': 'ToiletBook/1.0' } }
+          )
+          const geoData = await geoRes.json()
+          if (geoData?.[0]) {
+            pinLat = parseFloat(geoData[0].lat)
+            pinLng = parseFloat(geoData[0].lon)
           }
-        )
-        if (toiletError) {
-          console.error('Toilet pin error:', toiletError.message)
-        } else {
-          console.log('Toilet pin created/linked:', toiletData)
-        }
+        } catch { /* silent fail */ }
+      }
+
+      // Geocode venue name + address combo as last resort
+      if ((pinLat === null || pinLng === null) && storeName.trim()) {
+        const searchQuery = [storeName.trim(), address.trim()].filter(Boolean).join(', ')
+        try {
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
+            { headers: { 'User-Agent': 'ToiletBook/1.0' } }
+          )
+          const geoData = await geoRes.json()
+          if (geoData?.[0]) {
+            pinLat = parseFloat(geoData[0].lat)
+            pinLng = parseFloat(geoData[0].lon)
+          }
+        } catch { /* silent fail */ }
+      }
+
+      // Create or link toilet pin if we have any coordinates
+      if (newPost?.id && pinLat !== null && pinLng !== null) {
+        const { error: toiletError } = await supabase.rpc('upsert_toilet_from_post', {
+          p_post_id:    newPost.id,
+          p_user_id:    userId,
+          p_lat:        pinLat,
+          p_lng:        pinLng,
+          p_name:       storeName.trim() || null,
+          p_address:    address.trim() || null,
+          p_city:       null,
+          p_venue_type: 'public',
+        })
+        if (toiletError) console.error('Toilet pin error:', toiletError.message)
       }
 
       // Build toast with bonuses
+      const onMap = pinLat !== null
       const bonuses = ["+10 FLUSH"]
       if (hasAdultChangingStation) bonuses.push("+25 FLUSH")
       if (hasFamilyBathroom)       bonuses.push("+15 FLUSH")
       if (hasGenderNeutral)        bonuses.push("+15 FLUSH")
-      if (gpsLat !== null)         bonuses.push("📍 on map!")
+      if (onMap)                   bonuses.push("📍 on map!")
 
       toast.success(`Review live! ${bonuses.join(" · ")} 🚽`, { duration: 5000 })
       reset()
