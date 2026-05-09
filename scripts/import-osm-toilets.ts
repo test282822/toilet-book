@@ -19,7 +19,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 const OVERPASS_API = 'https://overpass.kumi.systems/api/interpreter'
 const BATCH_SIZE = 200
-const DELAY_MS = 8000
+const DELAY_MS = 12000
 
 const REGIONS = [
   { name: 'New York',       bbox: '40.4,-74.3,41.0,-73.6' },
