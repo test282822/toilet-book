@@ -5,6 +5,7 @@ export interface Profile {
   avatar_url: string | null
   bio: string | null
   website: string | null
+  flush_balance: number
   created_at: string
   updated_at: string
 }
@@ -24,6 +25,8 @@ export interface Post {
   likes_count: number
   moderation_status: string
   has_adult_changing_station: boolean
+  has_family_bathroom: boolean
+  has_gender_neutral: boolean
   is_family_friendly: boolean | null
   created_at: string
   updated_at: string

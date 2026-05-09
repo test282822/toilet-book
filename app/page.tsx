@@ -15,12 +15,22 @@ async function getStats() {
     { count: totalPosts },
     { count: totalUsers },
     { count: totalAdultStations },
+    { count: totalFamilyBathrooms },
+    { count: totalGenderNeutral },
   ] = await Promise.all([
     supabase.from("posts").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("posts").select("*", { count: "exact", head: true }).eq("has_adult_changing_station", true),
+    supabase.from("posts").select("*", { count: "exact", head: true }).eq("has_family_bathroom", true),
+    supabase.from("posts").select("*", { count: "exact", head: true }).eq("has_gender_neutral", true),
   ])
-  return { totalPosts: totalPosts ?? 0, totalUsers: totalUsers ?? 0, totalAdultStations: totalAdultStations ?? 0 }
+  return {
+    totalPosts: totalPosts ?? 0,
+    totalUsers: totalUsers ?? 0,
+    totalAdultStations: totalAdultStations ?? 0,
+    totalFamilyBathrooms: totalFamilyBathrooms ?? 0,
+    totalGenderNeutral: totalGenderNeutral ?? 0,
+  }
 }
 
 export default async function HomePage() {
@@ -53,7 +63,7 @@ export default async function HomePage() {
       <footer className="border-t border-slate-200/60 dark:border-slate-800/60 py-8 text-center hidden md:block">
         <p className="text-sm text-slate-400 flex items-center justify-center gap-1.5">
           <Toilet className="h-4 w-4 text-sky-400" />
-          Toilet Book — rating the world&apos;s restrooms, one flush at a time
+          Toilet Book — rating the world's restrooms, one flush at a time
         </p>
       </footer>
     </div>
@@ -70,10 +80,6 @@ function FeedSkeleton() {
             <div className="flex items-center gap-2">
               <div className="h-7 w-7 rounded-full animate-pulse bg-slate-200 dark:bg-slate-700" />
               <div className="h-3 w-24 rounded animate-pulse bg-slate-200 dark:bg-slate-700" />
-            </div>
-            <div className="space-y-1.5">
-              <div className="h-3 w-full rounded animate-pulse bg-slate-100 dark:bg-slate-800" />
-              <div className="h-3 w-3/4 rounded animate-pulse bg-slate-100 dark:bg-slate-800" />
             </div>
           </div>
         </div>

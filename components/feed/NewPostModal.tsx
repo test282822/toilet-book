@@ -25,8 +25,61 @@ interface NewPostModalProps {
 }
 
 const RATING_LABELS = ["", "Disgusting 🤢", "Not great", "Decent", "Pretty clean!", "Spotless! 🏆"]
-
 type ModerationState = "idle" | "checking" | "approved" | "rejected"
+
+// ── Reusable checkbox row component ──────────────────────────────
+function CheckboxRow({
+  checked,
+  onChange,
+  icon,
+  iconColor,
+  label,
+  description,
+  checkedColor = "bg-emerald-500 border-emerald-500",
+  hoverColor = "group-hover:border-emerald-400",
+  flushBadge,
+}: {
+  checked: boolean
+  onChange: () => void
+  icon: React.ReactNode
+  iconColor: string
+  label: string
+  description: string
+  checkedColor?: string
+  hoverColor?: string
+  flushBadge: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onChange}
+      className="flex items-center gap-3 w-full text-left group"
+    >
+      <div className={cn(
+        "h-5 w-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150",
+        checked ? checkedColor : `border-slate-300 dark:border-slate-600 ${hoverColor}`,
+      )}>
+        {checked && (
+          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+      </div>
+      <div className="flex items-center gap-2 flex-1">
+        <span className={`flex-shrink-0 ${iconColor}`}>{icon}</span>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</p>
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded-full">
+              {flushBadge}
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+        </div>
+      </div>
+    </button>
+  )
+}
 
 export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) {
   const router = useRouter()
@@ -39,6 +92,8 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
   const [address, setAddress] = useState("")
   const [googleMapsUrl, setGoogleMapsUrl] = useState("")
   const [hasAdultChangingStation, setHasAdultChangingStation] = useState(false)
+  const [hasFamilyBathroom, setHasFamilyBathroom] = useState(false)
+  const [hasGenderNeutral, setHasGenderNeutral] = useState(false)
   const [isFamilyFriendly, setIsFamilyFriendly] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(false)
   const [moderation, setModeration] = useState<ModerationState>("idle")
@@ -72,8 +127,8 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
     onDrop,
     accept: { "image/*": [".jpg", ".jpeg", ".png", ".webp"] },
     maxFiles: 1,
-    maxSize: 20 * 1024 * 1024,
-    onDropRejected: () => toast.error("Image must be under 20 MB"),
+    maxSize: 40 * 1024 * 1024,
+    onDropRejected: () => toast.error("Image must be under 40 MB"),
   })
 
   const clearImage = () => {
@@ -87,7 +142,10 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
     setCaption(""); setRating(0)
     setStoreName(""); setStoreUrl("")
     setAddress(""); setGoogleMapsUrl("")
-    setHasAdultChangingStation(false); setIsFamilyFriendly(null)
+    setHasAdultChangingStation(false)
+    setHasFamilyBathroom(false)
+    setHasGenderNeutral(false)
+    setIsFamilyFriendly(null)
   }
 
   const handleSubmit = async () => {
@@ -95,10 +153,8 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
     if (rating === 0) return toast.error("Please add a star rating")
     if (moderation === "rejected") return toast.error("Please upload a toilet photo")
     if (moderation === "checking") return toast.error("Please wait — checking your photo")
-
-    // basic URL validation if provided
-    if (storeUrl && !storeUrl.startsWith("http")) return toast.error("Store URL must start with http:// or https://")
-    if (googleMapsUrl && !googleMapsUrl.startsWith("http")) return toast.error("Google Maps URL must start with http:// or https://")
+    if (storeUrl && !storeUrl.startsWith("http")) return toast.error("Store URL must start with http://")
+    if (googleMapsUrl && !googleMapsUrl.startsWith("http")) return toast.error("Google Maps URL must start with http://")
 
     setLoading(true)
     try {
@@ -126,11 +182,20 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
         tags: [],
         moderation_status: "approved",
         has_adult_changing_station: hasAdultChangingStation,
+        has_family_bathroom: hasFamilyBathroom,
+        has_gender_neutral: hasGenderNeutral,
         is_family_friendly: isFamilyFriendly,
       })
       if (insertError) throw insertError
 
-      toast.success("Your toilet review is live! 🚽")
+      // Build a fun toast based on what was checked
+      const bonuses = []
+      if (hasAdultChangingStation) bonuses.push("+25 FLUSH")
+      if (hasFamilyBathroom) bonuses.push("+15 FLUSH")
+      if (hasGenderNeutral) bonuses.push("+15 FLUSH")
+      const bonusText = bonuses.length > 0 ? ` Bonus earned: ${bonuses.join(", ")}!` : ""
+
+      toast.success(`Review posted! +10 FLUSH earned.${bonusText} 🚽`, { duration: 5000 })
       reset()
       onOpenChange(false)
       router.refresh()
@@ -158,7 +223,7 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
 
         <div className="space-y-5">
 
-          {/* info banner */}
+          {/* Info banner */}
           <div className="flex items-start gap-2.5 rounded-xl border border-sky-200/80 bg-sky-50/60 px-3.5 py-3 dark:border-sky-900/50 dark:bg-sky-950/30">
             <ShowerHead className="mt-0.5 h-4 w-4 shrink-0 text-sky-500" />
             <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
@@ -166,7 +231,7 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
             </p>
           </div>
 
-          {/* ── Photo drop zone ── */}
+          {/* Photo drop zone */}
           {!preview ? (
             <div {...getRootProps()} className={cn(
               "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer min-h-[200px] group",
@@ -186,7 +251,7 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     {isDragActive ? "Drop your photo here" : "Upload a toilet photo"}
                   </p>
-                  <p className="text-xs text-slate-400 mt-1">JPG, PNG, WEBP · Max 20 MB</p>
+                  <p className="text-xs text-slate-400 mt-1">JPG, PNG, WEBP · Max 40 MB · 24MP supported</p>
                 </div>
                 <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-xs font-medium text-white">
                   <Upload className="h-3.5 w-3.5" />
@@ -219,7 +284,7 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
             </div>
           )}
 
-          {/* ── Star rating ── */}
+          {/* Star rating */}
           <div className="space-y-2">
             <Label>Overall Cleanliness Rating</Label>
             <div className="flex items-center gap-3">
@@ -230,106 +295,97 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
             </div>
           </div>
 
-          {/* ── Location section ── */}
+          {/* Location section */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
             <div className="flex items-center gap-2 mb-1">
               <MapPin className="h-4 w-4 text-sky-500" />
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Location Details</p>
               <span className="text-xs text-slate-400">(optional)</span>
             </div>
-
-            {/* Venue / store name */}
             <div className="space-y-1.5">
               <Label htmlFor="storeName" className="text-xs text-slate-500">Venue or business name</Label>
               <div className="relative">
                 <ShoppingBag className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                <Input
-                  id="storeName"
-                  placeholder="e.g. McDonald's Times Square, JFK Terminal B"
-                  value={storeName}
-                  onChange={(e) => setStoreName(e.target.value)}
-                  className="pl-8 text-sm"
-                />
+                <Input id="storeName" placeholder="e.g. McDonald's Times Square" value={storeName} onChange={(e) => setStoreName(e.target.value)} className="pl-8 text-sm" />
               </div>
             </div>
-
-            {/* Address */}
             <div className="space-y-1.5">
               <Label htmlFor="address" className="text-xs text-slate-500">Address</Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                <Input
-                  id="address"
-                  placeholder="e.g. 123 Main St, New York, NY 10001"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="pl-8 text-sm"
-                />
+                <Input id="address" placeholder="e.g. 123 Main St, New York, NY" value={address} onChange={(e) => setAddress(e.target.value)} className="pl-8 text-sm" />
               </div>
             </div>
-
-            {/* Google Maps link */}
             <div className="space-y-1.5">
               <Label htmlFor="googleMapsUrl" className="text-xs text-slate-500">Google Maps link</Label>
               <div className="relative">
                 <Link className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                <Input
-                  id="googleMapsUrl"
-                  placeholder="https://maps.google.com/..."
-                  value={googleMapsUrl}
-                  onChange={(e) => setGoogleMapsUrl(e.target.value)}
-                  className="pl-8 text-sm"
-                />
+                <Input id="googleMapsUrl" placeholder="https://maps.google.com/..." value={googleMapsUrl} onChange={(e) => setGoogleMapsUrl(e.target.value)} className="pl-8 text-sm" />
               </div>
-              <p className="text-xs text-slate-400">Open Google Maps → Share → Copy link → paste here</p>
+              <p className="text-xs text-slate-400">Google Maps → Share → Copy link → paste here</p>
             </div>
-
-            {/* Website / store URL */}
             <div className="space-y-1.5">
               <Label htmlFor="storeUrl" className="text-xs text-slate-500">Venue website (optional)</Label>
               <div className="relative">
                 <Link className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                <Input
-                  id="storeUrl"
-                  placeholder="https://example.com"
-                  value={storeUrl}
-                  onChange={(e) => setStoreUrl(e.target.value)}
-                  className="pl-8 text-sm"
-                />
+                <Input id="storeUrl" placeholder="https://example.com" value={storeUrl} onChange={(e) => setStoreUrl(e.target.value)} className="pl-8 text-sm" />
               </div>
             </div>
           </div>
 
-          {/* ── Adult Changing Station ── */}
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-            <button
-              type="button"
-              onClick={() => setHasAdultChangingStation(!hasAdultChangingStation)}
-              className="flex items-center gap-3 w-full text-left group"
-            >
-              <div className={cn(
-                "h-5 w-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150",
-                hasAdultChangingStation
-                  ? "bg-emerald-500 border-emerald-500"
-                  : "border-slate-300 dark:border-slate-600 group-hover:border-emerald-400",
-              )}>
-                {hasAdultChangingStation && (
-                  <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </div>
-              <div className="flex items-center gap-2 flex-1">
-                <Accessibility className="h-4 w-4 text-emerald-500 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Has Adult Changing Station</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Adult-sized changing table available</p>
-                </div>
-              </div>
-            </button>
+          {/* ── Accessibility & Facility Checkboxes ── */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Accessibility className="h-4 w-4 text-emerald-500" />
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Facilities Available</p>
+              <span className="text-xs text-slate-400">earn bonus FLUSH</span>
+            </div>
+
+            {/* Adult Changing Station */}
+            <CheckboxRow
+              checked={hasAdultChangingStation}
+              onChange={() => setHasAdultChangingStation(!hasAdultChangingStation)}
+              icon={<Accessibility className="h-4 w-4" />}
+              iconColor="text-emerald-500"
+              label="Adult Changing Station"
+              description="Adult-sized changing table available"
+              checkedColor="bg-emerald-500 border-emerald-500"
+              hoverColor="group-hover:border-emerald-400"
+              flushBadge="+25 FLUSH"
+            />
+
+            <div className="border-t border-slate-100 dark:border-slate-800" />
+
+            {/* Family Bathroom */}
+            <CheckboxRow
+              checked={hasFamilyBathroom}
+              onChange={() => setHasFamilyBathroom(!hasFamilyBathroom)}
+              icon={<Users className="h-4 w-4" />}
+              iconColor="text-sky-500"
+              label="Family Bathroom"
+              description="Private room suitable for families with young children"
+              checkedColor="bg-sky-500 border-sky-500"
+              hoverColor="group-hover:border-sky-400"
+              flushBadge="+15 FLUSH"
+            />
+
+            <div className="border-t border-slate-100 dark:border-slate-800" />
+
+            {/* Gender Neutral */}
+            <CheckboxRow
+              checked={hasGenderNeutral}
+              onChange={() => setHasGenderNeutral(!hasGenderNeutral)}
+              icon={<span className="text-sm">⚧</span>}
+              iconColor="text-violet-500"
+              label="Gender Neutral Bathroom"
+              description="Open to all genders — not split male/female"
+              checkedColor="bg-violet-500 border-violet-500"
+              hoverColor="group-hover:border-violet-400"
+              flushBadge="+15 FLUSH"
+            />
           </div>
 
-          {/* ── Family Friendly ── */}
+          {/* Family Friendly Yes/No */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-sky-500" />
@@ -366,7 +422,7 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
             )}
           </div>
 
-          {/* ── Caption ── */}
+          {/* Caption */}
           <div className="space-y-1.5">
             <Label htmlFor="caption">Caption (optional)</Label>
             <Textarea
@@ -381,7 +437,7 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
             <p className="text-right text-xs text-slate-400">{caption.length}/300</p>
           </div>
 
-          {/* ── Submit ── */}
+          {/* Submit */}
           <Button onClick={handleSubmit} disabled={isSubmitDisabled} className="w-full h-11">
             {loading ? (
               <><Loader2 className="h-4 w-4 animate-spin" />Posting...</>
