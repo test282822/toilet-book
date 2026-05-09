@@ -33,6 +33,9 @@ export const metadata: Metadata = {
     "FLUSH token", "toilet book app", "bathroom community", "restroom community",
     "rate public bathrooms", "bathroom quality rating", "clean restroom finder",
   ],
+  verification: {
+    google: "google286b91d01f006f38.html",
+  },
   metadataBase: new URL("https://toilet-book.com"),
   alternates: { canonical: "https://toilet-book.com" },
   openGraph: {
