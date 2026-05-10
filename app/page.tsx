@@ -30,11 +30,17 @@ async function getStats() {
     supabase.from("posts").select("*", { count: "exact", head: true }).eq("has_adult_changing_station", true),
   ])
   return {
-    totalToilets:  totalToilets  ?? 0,
-    unratedToilets: unratedToilets ?? 0,
-    totalReviews:  totalReviews  ?? 0,
-    totalUsers:    totalUsers    ?? 0,
-    adultStations: adultStations ?? 0,
+    // New names used in homepage sections
+    totalToilets:      totalToilets  ?? 0,
+    unratedToilets:    unratedToilets ?? 0,
+    totalReviews:      totalReviews  ?? 0,
+    totalUsers:        totalUsers    ?? 0,
+    adultStations:     adultStations ?? 0,
+    // Legacy names expected by MobileHero and HeroSection
+    totalPosts:        totalReviews  ?? 0,
+    totalAdultStations: adultStations ?? 0,
+    totalFamilyBathrooms: 0,
+    totalGenderNeutral: 0,
   }
 }
 
