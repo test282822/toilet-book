@@ -1,5 +1,6 @@
 "use client"
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useEffect, useRef, useState, useCallback, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { Filter, X, Loader2, ZoomIn, WifiOff, AlertTriangle } from "lucide-react"
@@ -39,7 +40,7 @@ function EmptyState({ type, onAction }: { type: 'no-toilets'|'offline'|'error'|'
   )
 }
 
-export default function MapPage() {
+function MapInner() {
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
   const markersLayer = useRef<any>(null)
@@ -56,6 +57,7 @@ export default function MapPage() {
   const filtersRef = useRef(filters)
   filtersRef.current = filters
   const MIN_ZOOM = 8
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     const on  = () => setIsOffline(false)
@@ -110,7 +112,19 @@ export default function MapPage() {
       const map = L.map(mapRef.current!, { center:[20,0], zoom:2 })
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom:19 }).addTo(map)
       leafletMap.current = map
-      if (navigator.geolocation) navigator.geolocation.getCurrentPosition((pos) => { map.setView([pos.coords.latitude, pos.coords.longitude], 13); fetchViewport(map, L) }, () => {})
+      // ── Check URL params first (from NearMe button) ──────────
+      const urlLat  = parseFloat(searchParams.get('lat')  || '')
+      const urlLng  = parseFloat(searchParams.get('lng')  || '')
+      const urlZoom = parseInt(searchParams.get('zoom') || '15', 10)
+      if (!isNaN(urlLat) && !isNaN(urlLng)) {
+        map.setView([urlLat, urlLng], urlZoom)
+        fetchViewport(map, L)
+      } else if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => { map.setView([pos.coords.latitude, pos.coords.longitude], 13); fetchViewport(map, L) },
+          () => {}
+        )
+      }
       map.on('moveend', () => scheduleViewportFetch(map, L))
       map.on('zoomend', () => scheduleViewportFetch(map, L))
       map.on('zoom',    () => setZoomLevel(map.getZoom()))
@@ -200,5 +214,15 @@ export default function MapPage() {
       </div>
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.leaflet-container{background:#1e293b;}`}</style>
     </div>
+  )
+}
+}
+
+
+export default function MapPage() {
+  return (
+    <Suspense fallback={<div style={{ height:"100vh", background:"#0f172a" }} />}>
+      <MapInner />
+    </Suspense>
   )
 }

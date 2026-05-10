@@ -7,6 +7,7 @@ import {
 import { Navbar }    from "@/components/layout/Navbar"
 import { PostFeed }  from "@/components/feed/PostFeed"
 import { getFeedPosts } from "@/lib/posts"
+import { NearMeButton } from "@/components/layout/NearMeButton"
 import { createClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
@@ -121,13 +122,7 @@ export default async function HomePage() {
                   Join Free &amp; Earn FLUSH
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link
-                  href="/map"
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                >
-                  <Navigation className="h-4 w-4 text-sky-500" />
-                  Find toilets near me
-                </Link>
+                <NearMeButton />
               </div>
             </div>
 
