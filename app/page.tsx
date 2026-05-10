@@ -8,11 +8,7 @@ import { Navbar }    from "@/components/layout/Navbar"
 import { PostFeed }  from "@/components/feed/PostFeed"
 import { getFeedPosts } from "@/lib/posts"
 import { createClient } from "@/lib/supabase/server"
-import { HeroSection }  from "@/components/layout/HeroSection"
-import { MobileHero }   from "@/components/layout/MobileHero"
-
 export const dynamic = "force-dynamic"
-
 // ── pull live stats ───────────────────────────────────────────────
 async function getStats() {
   const supabase = await createClient()
@@ -43,23 +39,20 @@ async function getStats() {
     totalGenderNeutral: 0,
   }
 }
-
 function fmtNum(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M"
   if (n >= 1_000)     return (n / 1_000).toFixed(0) + "K+"
   return n.toLocaleString()
 }
-
 // ── example review prompts ────────────────────────────────────────
 const PROMPTS = [
-  { emoji: "🍽️", text: "Your favourite restaurant's bathroom" },
-  { emoji: "🚫", text: "The #1 bathroom you'll never use again" },
-  { emoji: "✈️", text: "Best airport bathroom you've found" },
-  { emoji: "🏖️", text: "Cleanest beach bathroom on your travels" },
-  { emoji: "🏆", text: "The hidden gem toilet nobody talks about" },
-  { emoji: "😱", text: "The most disgusting public toilet you've survived" },
+  { emoji: " ", text: "Your favourite restaurant's bathroom" },
+  { emoji: " ", text: "The #1 bathroom you'll never use again" },
+  { emoji: " ", text: "Best airport bathroom you've found" },
+  { emoji: " ", text: "Cleanest beach bathroom on your travels" },
+  { emoji: " ", text: "The hidden gem toilet nobody talks about" },
+  { emoji: " ", text: "The most disgusting public toilet you've survived" },
 ]
-
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -72,40 +65,27 @@ export default async function HomePage() {
     getFeedPosts(0, user?.id),
     getStats(),
   ])
-
   return (
     <div className="flex flex-col min-h-screen bg-[var(--bg)]">
       <Navbar profile={profile} />
-
-      {/* ── Mobile hero ── */}
-      <div className="block md:hidden">
-        <MobileHero isLoggedIn={!!user} userId={user?.id} stats={stats} />
-      </div>
-
-      {/* ── Desktop hero ── */}
-      <div className="hidden md:block">
-        <HeroSection stats={stats} userId={user?.id} />
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════
+      {/* 
+══════════════════════════════════════════════════════════
           NEW HERO BANNER — replaces old "bathroom vibe" copy
-      ══════════════════════════════════════════════════════════ */}
+══════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden border-b border-slate-200/60 dark:border-slate-800/60 bg-gradient-to-br from-sky-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
         {/* Blobs */}
         <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-sky-200/40 dark:bg-sky-800/15 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-indigo-200/40 dark:bg-indigo-800/15 blur-3xl pointer-events-none" />
-
         <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-
-            {/* ── Left — copy ── */}
+            {/* 
+── Left — copy ── */}
             <div className="flex-1 text-center lg:text-left">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50/80 px-3 py-1 text-xs font-medium text-sky-700 dark:border-sky-800 dark:bg-sky-900/30 dark:text-sky-400 mb-5">
                 <Sparkles className="h-3 w-3" />
                 World&apos;s first community toilet rating platform with crypto rewards
               </div>
-
               {/* Headline */}
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white mb-4 leading-tight">
                 Help everyone find{" "}
@@ -113,7 +93,6 @@ export default async function HomePage() {
                   the perfect public toilet
                 </span>
               </h1>
-
               {/* Sub */}
               <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto lg:mx-0 mb-3">
                 Rate your favourite restaurant&apos;s bathroom. Warn the world about the one you&apos;ll never use again.
@@ -122,7 +101,6 @@ export default async function HomePage() {
               <p className="text-sm text-slate-400 dark:text-slate-500 max-w-lg mx-auto lg:mx-0 mb-8">
                 We&apos;re building a global community-powered toilet database — block by block, flush by flush.
               </p>
-
               {/* CTAs */}
               <div className="flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start">
                 <Link
@@ -142,10 +120,9 @@ export default async function HomePage() {
                 </Link>
               </div>
             </div>
-
-            {/* ── Right — live stats + unrated CTA ── */}
+            {/* 
+── Right — live stats + unrated CTA ── */}
             <div className="flex-shrink-0 w-full lg:w-80 space-y-3">
-
               {/* Live stat cards */}
               <div className="grid grid-cols-2 gap-3">
                 {[
@@ -161,8 +138,8 @@ export default async function HomePage() {
                   </div>
                 ))}
               </div>
-
-              {/* ── UNRATED CTA — the big opportunity card ── */}
+              {/* 
+── UNRATED CTA — the big opportunity card ── */}
               <Link
                 href="/map"
                 className="group flex items-center justify-between rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/50 p-4 hover:shadow-md transition-all"
@@ -180,15 +157,14 @@ export default async function HomePage() {
                 </div>
                 <ChevronRight className="h-5 w-5 text-amber-400 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
               </Link>
-
             </div>
           </div>
         </div>
       </section>
-
-      {/* ══════════════════════════════════════════════════════════
+      {/* 
+══════════════════════════════════════════════════════════
           REVIEW PROMPT IDEAS — give users inspiration
-      ══════════════════════════════════════════════════════════ */}
+══════════════════════════════════════════════════════════ */}
       <section className="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 py-6 px-4 overflow-hidden">
         <div className="mx-auto max-w-6xl">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center mb-4">
@@ -208,10 +184,10 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ══════════════════════════════════════════════════════════
+      {/* 
+══════════════════════════════════════════════════════════
           CRYPTO / MISSION STRIP
-      ══════════════════════════════════════════════════════════ */}
+══════════════════════════════════════════════════════════ */}
       <section className="bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 py-8 px-4">
         <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           <div>
@@ -231,10 +207,10 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
-
-      {/* ══════════════════════════════════════════════════════════
+      {/* 
+══════════════════════════════════════════════════════════
           FEED
-      ══════════════════════════════════════════════════════════ */}
+══════════════════════════════════════════════════════════ */}
       <main
         className="flex-1 mx-auto w-full max-w-6xl px-4 py-8 sm:px-6"
         style={{ paddingBottom: user ? "100px" : undefined }}
@@ -247,8 +223,8 @@ export default async function HomePage() {
           <PostFeed initialPosts={initialPosts} currentUserId={user?.id} />
         </Suspense>
       </main>
-
-      {/* ── Footer desktop ── */}
+      {/* 
+── Footer desktop ── */}
       <footer className="border-t border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-950 hidden md:block">
         <div className="mx-auto max-w-6xl px-6 py-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -283,13 +259,13 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-slate-400">© {new Date().getFullYear()} Toilet Book · toilet-book.com · All rights reserved</p>
+            <p className="text-xs text-slate-400">© {new Date().getFullYear()} Toilet Book · toilet-book.com 
             <a href="mailto:toiletbookmain@gmail.com" className="text-xs text-slate-400 hover:text-sky-500 transition-colors">toiletbookmain@gmail.com</a>
           </div>
         </div>
       </footer>
-
-      {/* ── Footer mobile ── */}
+      {/* 
+── Footer mobile ── */}
       <footer className="block md:hidden border-t border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-950 px-4 py-6">
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-slate-400 mb-3">
           <Link href="/policies" className="hover:text-sky-400 transition-colors">Rules</Link>
@@ -299,13 +275,11 @@ export default async function HomePage() {
           <Link href="/map"      className="hover:text-sky-400 transition-colors">Map</Link>
           <Link href="/shop"     className="hover:text-sky-400 transition-colors">Shop</Link>
         </div>
-        <p className="text-center text-xs text-slate-500">© {new Date().getFullYear()} Toilet Book · All rights reserved</p>
+        <p className="text-center text-xs text-slate-500">© {new Date().getFullYear()} Toilet Book 
       </footer>
-
     </div>
   )
 }
-
 function FeedSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
