@@ -82,11 +82,11 @@ export default function FlushTokenPage() {
       setUserId(user.id)
       const { data: profile } = await supabase
         .from("profiles")
-        .select("flush_points, sol_wallet_address")
+        .select("flush_balance, sol_wallet_address")
         .eq("id", user.id)
         .single()
       if (profile) {
-        setFlushBalance(profile.flush_points ?? 0)
+        setFlushBalance(profile.flush_balance ?? 0)
         if (profile.sol_wallet_address) {
           setWalletAddress(profile.sol_wallet_address)
           setRegistered(true)
