@@ -216,8 +216,6 @@ function MapInner() {
     </div>
   )
 }
-}
-
 
 export default function MapPage() {
   return (
