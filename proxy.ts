@@ -26,7 +26,7 @@ const FLIP_PATTERNS = [
   /Teleca/i,
 ]
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const ua  = request.headers.get("user-agent") || ""
   const url = request.nextUrl
 
