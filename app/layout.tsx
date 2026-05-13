@@ -2,16 +2,16 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "react-hot-toast"
-import { ThemeProvider } from "@/components/layout/ThemeProvider"
+import { ThemeProvider }          from "@/components/layout/ThemeProvider"
 import { ServiceWorkerRegistrar } from "@/components/layout/ServiceWorkerRegistrar"
-import { PWAInstallBanner } from "@/components/layout/PWAInstallBanner"
+import { PWAInstallBanner }       from "@/components/layout/PWAInstallBanner"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://toilet-book.com"),
 
-  // ── Primary title & description ──────────────────────────────
+  // ── Primary title & description ────────────────────────────────
   title: {
     default:  "Toilet Book — Rate Public Toilets & Find Clean Bathrooms Near You",
     template: "%s | Toilet Book",
@@ -19,9 +19,8 @@ export const metadata: Metadata = {
   description:
     "Toilet Book is the world's first community-powered public toilet rating platform. Find clean bathrooms near you, rate restrooms, report accessibility features, and earn FLUSH crypto rewards. 47,000+ toilets mapped worldwide.",
 
-  // ── Keywords — targeting real search intent ───────────────────
+  // ── Keywords ───────────────────────────────────────────────────
   keywords: [
-    // Core intent
     "public toilet rating",
     "rate public toilets",
     "bathroom rating app",
@@ -31,29 +30,20 @@ export const metadata: Metadata = {
     "public restroom finder",
     "toilet finder app",
     "bathroom finder near me",
-
-    // Accessibility intent
     "adult changing station finder",
     "accessible bathroom finder",
     "family bathroom near me",
     "gender neutral bathroom finder",
     "wheelchair accessible toilet",
-
-    // Location intent
     "public toilets near me",
     "clean public bathrooms",
     "best public restrooms",
-    "worst public bathrooms",
     "restaurant bathroom rating",
-
-    // Platform brand
     "Toilet Book",
     "toilet-book.com",
     "FLUSH token",
     "toilet crypto rewards",
     "earn crypto reviewing toilets",
-
-    // Long tail
     "crowdsourced toilet ratings",
     "community toilet map",
     "public toilet map",
@@ -61,7 +51,7 @@ export const metadata: Metadata = {
     "restroom quality review",
   ],
 
-  // ── Open Graph (Facebook, LinkedIn, iMessage previews) ───────
+  // ── Open Graph ─────────────────────────────────────────────────
   openGraph: {
     type:        "website",
     locale:      "en_US",
@@ -80,49 +70,50 @@ export const metadata: Metadata = {
     ],
   },
 
-  // ── Twitter / X card ─────────────────────────────────────────
+  // ── Twitter / X card ───────────────────────────────────────────
   twitter: {
     card:        "summary_large_image",
     title:       "Toilet Book — Rate Toilets. Earn Crypto.",
     description:
       "The world's first community toilet rating platform with crypto rewards. Find clean bathrooms near you. 47,000+ locations mapped.",
-    images:      ["/og-image.png"],
-    creator:     "@toiletbook",
+    images:   ["/og-image.png"],
+    creator:  "@toiletbook",
   },
 
-  // ── Canonical & alternate ─────────────────────────────────────
+  // ── Canonical ──────────────────────────────────────────────────
   alternates: {
     canonical: "https://toilet-book.com",
   },
 
-  // ── Robots ───────────────────────────────────────────────────
+  // ── Robots ─────────────────────────────────────────────────────
   robots: {
-    index:                    true,
-    follow:                   true,
+    index:  true,
+    follow: true,
     googleBot: {
-      index:                  true,
-      follow:                 true,
-      "max-video-preview":    -1,
-      "max-image-preview":    "large",
-      "max-snippet":          -1,
+      index:               true,
+      follow:              true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet":       -1,
     },
   },
 
-  // ── App & favicon ─────────────────────────────────────────────
+  // ── Icons — using exact favicon.io filenames ───────────────────
   icons: {
-    icon:        "/favicon.ico",
-    shortcut:    "/favicon.ico",
-    apple:       "/apple-touch-icon.png",
+    icon: [
+      { url: "/favicon.ico",        sizes: "any" },
+      { url: "/favicon-16x16.png",  sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png",  sizes: "32x32", type: "image/png" },
+    ],
+    apple:   "/apple-touch-icon.png",
+    shortcut: "/favicon.ico",
   },
+
+  // ── PWA manifest ───────────────────────────────────────────────
   manifest: "/manifest.json",
-
-  // ── Verification — already done via file, keeping for safety ─
-  // verification: { google: "YOUR_CODE_HERE" },
-
-  // ── Structured data injected via JSON-LD below ───────────────
 }
 
-// ── JSON-LD Structured Data — helps Google understand the site ──
+// ── JSON-LD Structured Data ────────────────────────────────────────
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
@@ -139,24 +130,25 @@ const jsonLd = {
       },
     },
     {
-      "@type":         "MobileApplication",
-      "name":          "Toilet Book",
-      "url":           "https://toilet-book.com",
+      "@type":               "MobileApplication",
+      "name":                "Toilet Book",
+      "url":                 "https://toilet-book.com",
       "applicationCategory": "LifestyleApplication",
-      "operatingSystem": "Any",
-      "description":   "Rate public toilets, find clean bathrooms near you, report accessibility features, and earn FLUSH crypto rewards.",
+      "operatingSystem":     "Any",
+      "description":
+        "Rate public toilets, find clean bathrooms near you, report accessibility features, and earn FLUSH crypto rewards.",
       "offers": {
-        "@type": "Offer",
-        "price": "0",
+        "@type":         "Offer",
+        "price":         "0",
         "priceCurrency": "USD",
       },
     },
     {
-      "@type":     "Organization",
-      "@id":       "https://toilet-book.com/#organization",
-      "name":      "Toilet Book",
-      "url":       "https://toilet-book.com",
-      "logo":      "https://toilet-book.com/logo.png",
+      "@type":  "Organization",
+      "@id":    "https://toilet-book.com/#organization",
+      "name":   "Toilet Book",
+      "url":    "https://toilet-book.com",
+      "logo":   "https://toilet-book.com/android-chrome-512x512.png",
       "contactPoint": {
         "@type":             "ContactPoint",
         "email":             "toiletbookmain@gmail.com",
@@ -175,19 +167,28 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* PWA manifest */}
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        {/* ── Favicons — favicon.io package ── */}
+        <link rel="icon"               href="/favicon.ico"       sizes="any" />
+        <link rel="icon"               href="/favicon-16x16.png" sizes="16x16" type="image/png" />
+        <link rel="icon"               href="/favicon-32x32.png" sizes="32x32" type="image/png" />
+        <link rel="apple-touch-icon"   href="/apple-touch-icon.png" />
+        <link rel="shortcut icon"      href="/favicon.ico" />
+
+        {/* ── PWA ── */}
+        <link rel="manifest"           href="/manifest.json" />
+        <meta name="theme-color"       content="#0ea5e9" />
+        <meta name="mobile-web-app-capable"            content="yes" />
+        <meta name="apple-mobile-web-app-capable"      content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Toilet Book" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-        {/* JSON-LD structured data */}
+        <meta name="apple-mobile-web-app-title"        content="Toilet Book" />
+
+        {/* ── JSON-LD structured data ── */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {/* Preconnect for performance */}
+
+        {/* ── Performance preconnects ── */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://dltanpkvuxomubasfepm.supabase.co" />
       </head>
