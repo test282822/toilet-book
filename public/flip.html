@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=128, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <title>Toilet Book</title>
+  <style>
+    /* ── Reset ── */
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    /* ── Base — works on 128px wide flip screens up to 320px ── */
+    body {
+      background: #000;
+      color: #0ff;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      padding: 2px;
+      max-width: 320px;
+    }
+
+    /* ── Header bar ── */
+    .hdr {
+      background: #006;
+      color: #0ff;
+      text-align: center;
+      padding: 3px 2px;
+      border-bottom: 1px solid #0ff;
+      letter-spacing: 1px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    .hdr .logo { font-size: 13px; }
+
+    /* ── Sections ── */
+    .section {
+      border: 1px solid #0ff;
+      margin: 3px 0;
+      padding: 3px;
+    }
+    .section-title {
+      background: #003366;
+      color: #0ff;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 2px 3px;
+      margin: -3px -3px 3px -3px;
+      border-bottom: 1px solid #0ff;
+    }
+
+    /* ── GPS status ── */
+    .gps-bar {
+      background: #001a00;
+      border: 1px solid #0f0;
+      color: #0f0;
+      font-size: 9px;
+      padding: 2px 4px;
+      margin: 2px 0;
+      text-align: center;
+    }
+    .gps-bar.off { border-color: #f00; color: #f00; background: #1a0000; }
+
+    /* ── Links / nav ── */
+    a {
+      color: #ff0;
+      text-decoration: none;
+      display: block;
+      padding: 3px 2px;
+      border-bottom: 1px dotted #333;
+      font-size: 11px;
+    }
+    a:last-child { border-bottom: none; }
+    a:before { content: "> "; color: #0ff; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: block;
+      width: 100%;
+      background: #003;
+      color: #0ff;
+      border: 1px solid #0ff;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      padding: 4px 2px;
+      text-align: center;
+      cursor: pointer;
+      margin: 2px 0;
+      letter-spacing: 1px;
+    }
+    .btn-rate  { background: #030; border-color: #0f0; color: #0f0; }
+    .btn-find  { background: #300; border-color: #f80; color: #f80; }
+    .btn-flush { background: #220; border-color: #ff0; color: #ff0; }
+
+    /* ── Star rating ── */
+    .stars { font-size: 14px; letter-spacing: 2px; }
+    .star-row {
+      display: flex;
+      justify-content: space-around;
+      margin: 3px 0;
+    }
+    .star-btn {
+      background: #000;
+      border: 1px solid #555;
+      color: #888;
+      font-size: 13px;
+      width: 28px;
+      height: 22px;
+      cursor: pointer;
+      font-family: monospace;
+    }
+    .star-btn.sel { border-color: #ff0; color: #ff0; background: #111; }
+
+    /* ── Form inputs ── */
+    input[type=text],
+    input[type=number],
+    select,
+    textarea {
+      background: #001;
+      color: #0ff;
+      border: 1px solid #0ff;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      width: 100%;
+      padding: 2px 3px;
+      margin: 2px 0;
+    }
+    textarea { height: 40px; resize: none; }
+    label { color: #88f; font-size: 10px; display: block; margin-top: 3px; }
+
+    /* ── Checkbox row ── */
+    .chk-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin: 2px 0;
+      font-size: 10px;
+      color: #0ff;
+    }
+    input[type=checkbox] { width: auto; margin: 0; }
+
+    /* ── Review card ── */
+    .review {
+      border: 1px solid #333;
+      padding: 3px;
+      margin: 2px 0;
+      font-size: 10px;
+    }
+    .review .r-venue { color: #ff0; font-weight: bold; }
+    .review .r-stars { color: #ff0; }
+    .review .r-body  { color: #aaa; margin-top: 2px; }
+    .review .r-time  { color: #555; font-size: 9px; margin-top: 1px; }
+
+    /* ── Stat row ── */
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dotted #222;
+      padding: 2px 0;
+      font-size: 10px;
+    }
+    .stat .val { color: #ff0; font-weight: bold; }
+
+    /* ── FLUSH balance ── */
+    .flush-bal {
+      text-align: center;
+      font-size: 18px;
+      color: #ff0;
+      font-weight: bold;
+      padding: 4px 0;
+      letter-spacing: 2px;
+    }
+    .flush-sub { text-align: center; font-size: 9px; color: #888; }
+
+    /* ── Footer ── */
+    .ftr {
+      border-top: 1px solid #333;
+      text-align: center;
+      font-size: 9px;
+      color: #444;
+      padding: 3px 0;
+      margin-top: 4px;
+    }
+
+    /* ── Page visibility — JS toggles ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Divider ── */
+    .div { border-top: 1px solid #222; margin: 3px 0; }
+
+    /* ── Alert / message ── */
+    .msg {
+      border: 1px solid #0f0;
+      background: #001a00;
+      color: #0f0;
+      font-size: 10px;
+      padding: 3px;
+      margin: 3px 0;
+      text-align: center;
+      display: none;
+    }
+    .msg.err { border-color: #f00; background: #1a0000; color: #f00; }
+    .msg.show { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     HEADER — always visible
+══════════════════════════════════════════ -->
+<div class="hdr">
+  <div class="logo">[ TOILET BOOK ]</div>
+  <div style="font-size:9px;color:#88f">bathroom ratings + crypto</div>
+</div>
+
+<!-- GPS status bar -->
+<div class="gps-bar off" id="gps-bar">GPS: OFF</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN MENU — page 0
+══════════════════════════════════════════ -->
+<div class="page active" id="pg-menu">
+  <div class="section">
+    <div class="section-title">MAIN MENU</div>
+    <a href="#" onclick="go('pg-find')">FIND TOILET NEAR ME</a>
+    <a href="#" onclick="go('pg-rate')">RATE A BATHROOM</a>
+    <a href="#" onclick="go('pg-feed')">LATEST REVIEWS</a>
+    <a href="#" onclick="go('pg-flush')">MY FLUSH TOKENS</a>
+    <a href="#" onclick="go('pg-about')">ABOUT</a>
+  </div>
+
+  <!-- Quick stats -->
+  <div class="section">
+    <div class="section-title">LIVE STATS</div>
+    <div class="stat"><span>Toilets mapped</span><span class="val" id="stat-total">47K+</span></div>
+    <div class="stat"><span>Reviews posted</span><span class="val" id="stat-reviews">--</span></div>
+    <div class="stat"><span>Members</span><span class="val" id="stat-users">--</span></div>
+    <div class="stat"><span>Token launch</span><span class="val">28 AUG 26</span></div>
+  </div>
+
+  <button class="btn btn-rate" onclick="go('pg-rate')">[ + RATE A TOILET ]</button>
+  <button class="btn btn-find" onclick="startGPS()">[ GPS FIND NEAR ME ]</button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     FIND PAGE — page 1
+══════════════════════════════════════════ -->
+<div class="page" id="pg-find">
+  <div class="section">
+    <div class="section-title">&lt; FIND TOILET</div>
+
+    <div id="find-gps-msg" class="msg">Getting your GPS location...</div>
+
+    <div id="find-results">
+      <div style="color:#888;font-size:10px;padding:4px 0;">
+        Press GPS button to find toilets near you.
+      </div>
+    </div>
+
+    <button class="btn btn-find" onclick="startGPS()" style="margin-top:4px">[ GET GPS LOCATION ]</button>
+    <div class="div"></div>
+    <button class="btn" onclick="go('pg-menu')">[ BACK ]</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     RATE PAGE — page 2
+══════════════════════════════════════════ -->
+<div class="page" id="pg-rate">
+  <div class="section">
+    <div class="section-title">&lt; RATE A BATHROOM</div>
+
+    <div id="rate-msg" class="msg"></div>
+
+    <label>VENUE NAME (optional)</label>
+    <input type="text" id="r-venue" placeholder="e.g. McDonalds Main St" maxlength="60" />
+
+    <label>CLEANLINESS (1-5 stars)</label>
+    <div class="star-row">
+      <button class="star-btn" onclick="setStar(1)" id="s1">1</button>
+      <button class="star-btn" onclick="setStar(2)" id="s2">2</button>
+      <button class="star-btn" onclick="setStar(3)" id="s3">3</button>
+      <button class="star-btn" onclick="setStar(4)" id="s4">4</button>
+      <button class="star-btn" onclick="setStar(5)" id="s5">5</button>
+    </div>
+    <div id="star-label" style="text-align:center;font-size:10px;color:#ff0;min-height:14px;"></div>
+
+    <div class="div"></div>
+
+    <label>FACILITIES</label>
+    <div class="chk-row">
+      <input type="checkbox" id="r-adult" />
+      <span>Adult changing table (+25 FLUSH)</span>
+    </div>
+    <div class="chk-row">
+      <input type="checkbox" id="r-family" />
+      <span>Family bathroom (+15 FLUSH)</span>
+    </div>
+    <div class="chk-row">
+      <input type="checkbox" id="r-neutral" />
+      <span>Gender neutral (+15 FLUSH)</span>
+    </div>
+
+    <div class="div"></div>
+
+    <label>NOTES (optional)</label>
+    <textarea id="r-notes" placeholder="Clean? Smelly? Paper stocked?"></textarea>
+
+    <div class="div"></div>
+
+    <div style="font-size:9px;color:#888;margin:2px 0;">
+      GPS will be captured on submit.
+    </div>
+
+    <button class="btn btn-rate" onclick="submitRate()">[ SUBMIT REVIEW ]</button>
+    <button class="btn" onclick="go('pg-menu')">[ BACK ]</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     FEED PAGE — page 3
+══════════════════════════════════════════ -->
+<div class="page" id="pg-feed">
+  <div class="section">
+    <div class="section-title">&lt; LATEST REVIEWS</div>
+    <div id="feed-list">
+      <div style="color:#888;font-size:10px;padding:4px 0;">Loading reviews...</div>
+    </div>
+    <div class="div"></div>
+    <button class="btn" onclick="loadFeed()">[ REFRESH ]</button>
+    <button class="btn" onclick="go('pg-menu')">[ BACK ]</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     FLUSH PAGE — page 4
+══════════════════════════════════════════ -->
+<div class="page" id="pg-flush">
+  <div class="section">
+    <div class="section-title">&lt; FLUSH TOKENS</div>
+
+    <div class="flush-bal" id="flush-bal">-- FLUSH</div>
+    <div class="flush-sub">Your current balance</div>
+
+    <div class="div"></div>
+
+    <div class="stat"><span>Sign up</span><span class="val">+50 pts</span></div>
+    <div class="stat"><span>Per review</span><span class="val">+10 pts</span></div>
+    <div class="stat"><span>First review</span><span class="val">+15 pts</span></div>
+    <div class="stat"><span>Adult station</span><span class="val">+25 pts</span></div>
+    <div class="stat"><span>Family room</span><span class="val">+15 pts</span></div>
+    <div class="stat"><span>Gender neutral</span><span class="val">+15 pts</span></div>
+    <div class="stat"><span>Referral</span><span class="val">+50 pts</span></div>
+
+    <div class="div"></div>
+
+    <div style="font-size:9px;color:#888;text-align:center;margin:3px 0;">
+      1 pt = 10 FLUSH tokens<br/>
+      Token launch: 28 AUG 2026<br/>
+      Solana SPL · 1 billion supply
+    </div>
+
+    <div class="div"></div>
+    <button class="btn" onclick="go('pg-menu')">[ BACK ]</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ABOUT PAGE — page 5
+══════════════════════════════════════════ -->
+<div class="page" id="pg-about">
+  <div class="section">
+    <div class="section-title">&lt; ABOUT</div>
+    <div style="font-size:10px;color:#aaa;line-height:1.6;">
+      <p>TOILET BOOK is the world's first community toilet rating platform with crypto rewards.</p>
+      <div class="div"></div>
+      <p>Rate bathrooms. Earn FLUSH tokens. Help everyone find a clean public toilet.</p>
+      <div class="div"></div>
+      <p style="color:#0ff;">47,000+ locations mapped worldwide.</p>
+      <div class="div"></div>
+      <p>FLUSH token launches on Solana: 28 AUG 2026</p>
+      <div class="div"></div>
+      <p style="color:#888;">toilet-book.com<br/>toiletbookmain@gmail.com</p>
+    </div>
+    <div class="div"></div>
+    <button class="btn" onclick="go('pg-menu')">[ BACK ]</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="ftr">toilet-book.com | v1.0-flip</div>
+
+<!-- ══════════════════════════════════════════
+     MINIMAL JS — only essentials
+══════════════════════════════════════════ -->
+<script>
+// ── Config ──────────────────────────────────
+var SB_URL = 'https://dltanpkvuxomubasfepm.supabase.co'
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsdGFucGt2dXhvbXViYXNmZXBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2NzA0MDIsImV4cCI6MjA2MjI0NjQwMn0.OvKfrUk6NwOekM1XJ9MP7A_768VkjMu0tDhV7W5tKbc'
+var HDR = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+
+var curStar = 0
+var gpsLat  = null
+var gpsLng  = null
+
+// ── Page navigation ──────────────────────────
+function go(id) {
+  var pages = document.querySelectorAll('.page')
+  for (var i = 0; i < pages.length; i++) {
+    pages[i].className = 'page'
+  }
+  document.getElementById(id).className = 'page active'
+  if (id === 'pg-feed') loadFeed()
+}
+
+// ── Star rating ──────────────────────────────
+var STAR_LABELS = ['', 'AVOID', 'BELOW AVG', 'DECENT', 'PRETTY GOOD', 'SPOTLESS!']
+function setStar(n) {
+  curStar = n
+  for (var i = 1; i <= 5; i++) {
+    var el = document.getElementById('s' + i)
+    el.className = i <= n ? 'star-btn sel' : 'star-btn'
+    el.innerHTML = i <= n ? '*' : i
+  }
+  document.getElementById('star-label').innerHTML = STAR_LABELS[n]
+}
+
+// ── GPS ──────────────────────────────────────
+function startGPS() {
+  var bar = document.getElementById('gps-bar')
+  var msg = document.getElementById('find-gps-msg')
+  bar.className = 'gps-bar'
+  bar.innerHTML = 'GPS: SEARCHING...'
+  if (msg) { msg.className = 'msg show'; msg.innerHTML = 'Getting your GPS location...' }
+
+  if (!navigator.geolocation) {
+    bar.className = 'gps-bar off'
+    bar.innerHTML = 'GPS: NOT SUPPORTED'
+    if (msg) { msg.innerHTML = 'GPS not available on this device.' }
+    return
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      gpsLat = pos.coords.latitude.toFixed(5)
+      gpsLng = pos.coords.longitude.toFixed(5)
+      bar.className = 'gps-bar'
+      bar.innerHTML = 'GPS: ' + gpsLat + ', ' + gpsLng
+      if (msg) { msg.className = 'msg'; msg.innerHTML = '' }
+      showNearby()
+    },
+    function() {
+      bar.className = 'gps-bar off'
+      bar.innerHTML = 'GPS: DENIED'
+      if (msg) { msg.className = 'msg err show'; msg.innerHTML = 'Location denied. Enter manually.' }
+    },
+    { timeout: 10000, maximumAge: 60000 }
+  )
+}
+
+// ── Show nearby toilets ──────────────────────
+function showNearby() {
+  if (!gpsLat || !gpsLng) return
+  var el = document.getElementById('find-results')
+  el.innerHTML = '<div style="color:#888;font-size:10px;">Searching nearby...</div>'
+
+  var lat = parseFloat(gpsLat)
+  var lng = parseFloat(gpsLng)
+  var d   = 0.05 // ~5km
+
+  var url = SB_URL + '/rest/v1/toilets?select=name,address,location_lat,location_lng,avg_overall,review_count' +
+    '&location_lat=gte.' + (lat - d) + '&location_lat=lte.' + (lat + d) +
+    '&location_lng=gte.' + (lng - d) + '&location_lng=lte.' + (lng + d) +
+    '&order=review_count.desc&limit=8'
+
+  fetch(url, { headers: HDR })
+    .then(function(r) { return r.json() })
+    .then(function(data) {
+      if (!data || !data.length) {
+        el.innerHTML = '<div style="color:#888;font-size:10px;">No rated toilets nearby yet.<br/>Be the first to review one!</div>'
+        return
+      }
+      var html = ''
+      for (var i = 0; i < data.length; i++) {
+        var t = data[i]
+        var name = t.name || 'Public Toilet'
+        var addr = t.address || ''
+        var avg  = t.avg_overall ? t.avg_overall.toFixed(1) : '--'
+        var cnt  = t.review_count || 0
+        var dist = getDistKm(lat, lng, t.location_lat, t.location_lng)
+        html += '<div class="review">'
+        html += '<div class="r-venue">' + name + '</div>'
+        if (addr) html += '<div style="color:#888;font-size:9px;">' + addr + '</div>'
+        html += '<div style="font-size:9px;color:#0ff;">' + dist + 'km away</div>'
+        html += '<div class="r-stars">Rating: ' + avg + '/5 (' + cnt + ' reviews)</div>'
+        html += '</div>'
+      }
+      el.innerHTML = html
+    })
+    .catch(function() {
+      el.innerHTML = '<div style="color:#f00;font-size:10px;">Network error. Check connection.</div>'
+    })
+}
+
+// ── Distance calc ────────────────────────────
+function getDistKm(lat1, lng1, lat2, lng2) {
+  var R = 6371
+  var dLat = (lat2 - lat1) * Math.PI / 180
+  var dLng = (lng2 - lng1) * Math.PI / 180
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+    Math.sin(dLng/2) * Math.sin(dLng/2)
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  return (R * c).toFixed(1)
+}
+
+// ── Submit review ────────────────────────────
+function submitRate() {
+  var msg = document.getElementById('rate-msg')
+  msg.className = 'msg'
+
+  if (!curStar) {
+    msg.className = 'msg err show'
+    msg.innerHTML = 'Please select a star rating!'
+    return
+  }
+
+  msg.className = 'msg show'
+  msg.innerHTML = 'Submitting...'
+
+  // Get GPS silently
+  var doSubmit = function(lat, lng) {
+    var body = {
+      rating:                    curStar,
+      store_name:                document.getElementById('r-venue').value || null,
+      caption:                   document.getElementById('r-notes').value || null,
+      has_adult_changing_station: document.getElementById('r-adult').checked,
+      has_family_bathroom:        document.getElementById('r-family').checked,
+      has_gender_neutral:         document.getElementById('r-neutral').checked,
+      image_url:                 'https://toilet-book.com/icons/icon-96x96.png',
+      moderation_status:         'approved',
+      tags:                      [],
+      source:                    'flip',
+    }
+
+    fetch(SB_URL + '/rest/v1/posts', {
+      method: 'POST',
+      headers: Object.assign({}, HDR, {
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      }),
+      body: JSON.stringify(body)
+    })
+    .then(function(r) { return r.json() })
+    .then(function(data) {
+      msg.className = 'msg show'
+      msg.innerHTML = 'REVIEW POSTED! +10 FLUSH earned.'
+      // Reset
+      curStar = 0
+      setStar(0)
+      document.getElementById('r-venue').value  = ''
+      document.getElementById('r-notes').value  = ''
+      document.getElementById('r-adult').checked   = false
+      document.getElementById('r-family').checked  = false
+      document.getElementById('r-neutral').checked = false
+    })
+    .catch(function() {
+      msg.className = 'msg err show'
+      msg.innerHTML = 'Network error. Try again.'
+    })
+  }
+
+  if (gpsLat && gpsLng) {
+    doSubmit(gpsLat, gpsLng)
+  } else if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        gpsLat = pos.coords.latitude.toFixed(5)
+        gpsLng = pos.coords.longitude.toFixed(5)
+        document.getElementById('gps-bar').innerHTML = 'GPS: ' + gpsLat + ', ' + gpsLng
+        document.getElementById('gps-bar').className = 'gps-bar'
+        doSubmit(gpsLat, gpsLng)
+      },
+      function() { doSubmit(null, null) },
+      { timeout: 6000 }
+    )
+  } else {
+    doSubmit(null, null)
+  }
+}
+
+// ── Load feed ────────────────────────────────
+function loadFeed() {
+  var el = document.getElementById('feed-list')
+  el.innerHTML = '<div style="color:#888;font-size:10px;">Loading...</div>'
+
+  fetch(SB_URL + '/rest/v1/posts?select=rating,store_name,caption,created_at,has_adult_changing_station&order=created_at.desc&limit=10', {
+    headers: HDR
+  })
+  .then(function(r) { return r.json() })
+  .then(function(data) {
+    if (!data || !data.length) {
+      el.innerHTML = '<div style="color:#888;font-size:10px;">No reviews yet. Be the first!</div>'
+      return
+    }
+    var html = ''
+    for (var i = 0; i < data.length; i++) {
+      var p     = data[i]
+      var name  = p.store_name || 'Public Toilet'
+      var stars = ''
+      for (var s = 0; s < p.rating; s++) stars += '*'
+      var dt   = new Date(p.created_at)
+      var time = dt.toLocaleDateString('en-US', { month:'short', day:'numeric' })
+      html += '<div class="review">'
+      html += '<div class="r-venue">' + name + '</div>'
+      html += '<div class="r-stars">' + stars + ' (' + p.rating + '/5)</div>'
+      if (p.caption) html += '<div class="r-body">' + p.caption.substring(0, 60) + '</div>'
+      if (p.has_adult_changing_station) html += '<div style="color:#0f0;font-size:9px;">+ Adult station</div>'
+      html += '<div class="r-time">' + time + '</div>'
+      html += '</div>'
+    }
+    el.innerHTML = html
+  })
+  .catch(function() {
+    el.innerHTML = '<div style="color:#f00;font-size:10px;">Network error.</div>'
+  })
+}
+
+// ── Load live stats ──────────────────────────
+function loadStats() {
+  // Reviews count
+  fetch(SB_URL + '/rest/v1/posts?select=id&limit=1', {
+    headers: Object.assign({}, HDR, { 'Prefer': 'count=exact' })
+  }).then(function(r) {
+    var cr = r.headers.get('content-range')
+    if (cr) {
+      var n = parseInt(cr.split('/')[1])
+      document.getElementById('stat-reviews').innerHTML = n > 999 ? (n/1000).toFixed(1)+'K' : n
+    }
+  }).catch(function() {})
+
+  // Users count
+  fetch(SB_URL + '/rest/v1/profiles?select=id&limit=1', {
+    headers: Object.assign({}, HDR, { 'Prefer': 'count=exact' })
+  }).then(function(r) {
+    var cr = r.headers.get('content-range')
+    if (cr) {
+      var n = parseInt(cr.split('/')[1])
+      document.getElementById('stat-users').innerHTML = n > 999 ? (n/1000).toFixed(1)+'K' : n
+    }
+  }).catch(function() {})
+}
+
+// ── Init ─────────────────────────────────────
+loadStats()
+</script>
+</body>
+</html>
