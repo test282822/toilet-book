@@ -15,5 +15,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/policies`, lastModified: now, changeFrequency: "monthly", priority: 0.5  },
     { url: `${BASE}/terms`,    lastModified: now, changeFrequency: "monthly", priority: 0.4  },
     { url: `${BASE}/privacy`,  lastModified: now, changeFrequency: "monthly", priority: 0.4  },
+    // SEO content pages
+    { url: `${BASE}/best-toilets-in-florida`,        lastModified: now, changeFrequency: "weekly",  priority: 0.85 },
+    { url: `${BASE}/most-accessible-public-bathrooms`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
   ]
 }
