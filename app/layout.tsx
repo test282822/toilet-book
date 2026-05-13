@@ -3,6 +3,8 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "react-hot-toast"
 import { ThemeProvider } from "@/components/layout/ThemeProvider"
+import { ServiceWorkerRegistrar } from "@/components/layout/ServiceWorkerRegistrar"
+import { PWAInstallBanner } from "@/components/layout/PWAInstallBanner"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -173,6 +175,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* PWA manifest */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Toilet Book" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         {/* JSON-LD structured data */}
         <script
           type="application/ld+json"
@@ -190,6 +199,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <ServiceWorkerRegistrar />
+          <PWAInstallBanner />
           <Toaster
             position="bottom-center"
             toastOptions={{
