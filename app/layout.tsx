@@ -1,123 +1,207 @@
-import type { Metadata, Viewport } from "next"
-import { ThemeProvider } from "next-themes"
-import { Toaster } from "react-hot-toast"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
 import "./globals.css"
+import { Toaster } from "react-hot-toast"
+import { ThemeProvider } from "@/components/layout/ThemeProvider"
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  themeColor: "#0ea5e9",
-}
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://toilet-book.com"),
+
+  // ── Primary title & description ──────────────────────────────
   title: {
-    default: "Toilet Book — Find Clean Bathrooms Near You | Rate & Review Restrooms",
-    template: "%s | Toilet Book — Bathroom Ratings & Reviews",
+    default:  "Toilet Book — Rate Public Toilets & Find Clean Bathrooms Near You",
+    template: "%s | Toilet Book",
   },
   description:
-    "Toilet Book is the world's #1 crowdsourced bathroom rating app. Find clean, accessible restrooms near you. Rate toilets, read reviews, discover adult changing stations, family bathrooms and gender neutral bathrooms everywhere you go.",
+    "Toilet Book is the world's first community-powered public toilet rating platform. Find clean bathrooms near you, rate restrooms, report accessibility features, and earn FLUSH crypto rewards. 47,000+ toilets mapped worldwide.",
+
+  // ── Keywords — targeting real search intent ───────────────────
   keywords: [
-    "bathroom rating", "bathroom ratings", "bathroom review", "bathroom reviews",
-    "find clean bathroom", "find clean restroom", "find bathrooms near me",
-    "restroom finder", "public bathroom finder", "toilet rating", "toilet ratings",
-    "toilet review", "rate a toilet", "clean bathroom near me", "best bathrooms",
-    "worst bathrooms", "adult changing station", "adult changing stations near me",
-    "adult changing table", "family bathroom", "family bathroom near me",
-    "gender neutral bathroom", "gender neutral restroom", "accessible bathroom",
-    "accessible restroom", "disability bathroom", "bathroom accessibility",
-    "airport bathroom rating", "restaurant bathroom rating", "hotel bathroom rating",
-    "gym bathroom rating", "mall bathroom rating", "public restroom rating",
-    "restroom review app", "bathroom review app", "toilet review app",
-    "FLUSH token", "toilet book app", "bathroom community", "restroom community",
-    "rate public bathrooms", "bathroom quality rating", "clean restroom finder",
+    // Core intent
+    "public toilet rating",
+    "rate public toilets",
+    "bathroom rating app",
+    "restroom rating",
+    "toilet reviews",
+    "find clean bathrooms near me",
+    "public restroom finder",
+    "toilet finder app",
+    "bathroom finder near me",
+
+    // Accessibility intent
+    "adult changing station finder",
+    "accessible bathroom finder",
+    "family bathroom near me",
+    "gender neutral bathroom finder",
+    "wheelchair accessible toilet",
+
+    // Location intent
+    "public toilets near me",
+    "clean public bathrooms",
+    "best public restrooms",
+    "worst public bathrooms",
+    "restaurant bathroom rating",
+
+    // Platform brand
+    "Toilet Book",
+    "toilet-book.com",
+    "FLUSH token",
+    "toilet crypto rewards",
+    "earn crypto reviewing toilets",
+
+    // Long tail
+    "crowdsourced toilet ratings",
+    "community toilet map",
+    "public toilet map",
+    "bathroom cleanliness rating",
+    "restroom quality review",
   ],
-  verification: {
-    google: "google286b91d01f006f38.html",
-  },
-  metadataBase: new URL("https://toilet-book.com"),
-  alternates: { canonical: "https://toilet-book.com" },
+
+  // ── Open Graph (Facebook, LinkedIn, iMessage previews) ───────
   openGraph: {
-    type: "website",
-    url: "https://toilet-book.com",
-    siteName: "Toilet Book",
-    title: "Toilet Book — Find Clean Bathrooms Near You",
+    type:        "website",
+    locale:      "en_US",
+    url:         "https://toilet-book.com",
+    siteName:    "Toilet Book",
+    title:       "Toilet Book — Rate Toilets. Earn Crypto. Help Everyone Find a Clean Bathroom.",
     description:
-      "Rate toilets. Read reviews. Find clean, accessible bathrooms everywhere — including adult changing stations, family bathrooms and gender neutral restrooms. Join the world's #1 bathroom rating community.",
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "Toilet Book — The world's #1 crowdsourced bathroom rating platform" }],
-    locale: "en_US",
+      "Community-powered toilet ratings with crypto rewards. Find clean bathrooms near you, rate restrooms, report accessibility features. 47,000+ locations mapped. Earn FLUSH tokens.",
+    images: [
+      {
+        url:    "/og-image.png",
+        width:  1200,
+        height: 630,
+        alt:    "Toilet Book — Rate public toilets and earn FLUSH crypto rewards",
+      },
+    ],
   },
+
+  // ── Twitter / X card ─────────────────────────────────────────
   twitter: {
-    card: "summary_large_image",
-    site: "@toiletbook",
-    title: "Toilet Book — Find Clean Bathrooms Near You",
-    description: "Rate toilets. Find clean bathrooms. Discover adult changing stations. Join the world's #1 bathroom rating community.",
-    images: ["/opengraph-image.png"],
+    card:        "summary_large_image",
+    title:       "Toilet Book — Rate Toilets. Earn Crypto.",
+    description:
+      "The world's first community toilet rating platform with crypto rewards. Find clean bathrooms near you. 47,000+ locations mapped.",
+    images:      ["/og-image.png"],
+    creator:     "@toiletbook",
+  },
+
+  // ── Canonical & alternate ─────────────────────────────────────
+  alternates: {
+    canonical: "https://toilet-book.com",
+  },
+
+  // ── Robots ───────────────────────────────────────────────────
+  robots: {
+    index:                    true,
+    follow:                   true,
+    googleBot: {
+      index:                  true,
+      follow:                 true,
+      "max-video-preview":    -1,
+      "max-image-preview":    "large",
+      "max-snippet":          -1,
+    },
+  },
+
+  // ── App & favicon ─────────────────────────────────────────────
+  icons: {
+    icon:        "/favicon.ico",
+    shortcut:    "/favicon.ico",
+    apple:       "/apple-touch-icon.png",
   },
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Toilet Book" },
-  formatDetection: { telephone: false },
-  icons: { icon: "/favicon.ico", apple: "/apple-icon.png", shortcut: "/favicon.ico" },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 },
-  },
-  category: "travel",
+
+  // ── Verification — already done via file, keeping for safety ─
+  // verification: { google: "YOUR_CODE_HERE" },
+
+  // ── Structured data injected via JSON-LD below ───────────────
 }
 
-const structuredData = {
+// ── JSON-LD Structured Data — helps Google understand the site ──
+const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "WebSite",
-      "@id": "https://toilet-book.com/#website",
-      "url": "https://toilet-book.com",
-      "name": "Toilet Book",
-      "description": "The world's #1 crowdsourced bathroom rating and review platform",
+      "@type":       "WebSite",
+      "@id":         "https://toilet-book.com/#website",
+      "url":         "https://toilet-book.com",
+      "name":        "Toilet Book",
+      "description": "The world's first community-powered public toilet rating platform with crypto rewards.",
       "potentialAction": {
-        "@type": "SearchAction",
-        "target": { "@type": "EntryPoint", "urlTemplate": "https://toilet-book.com/search?q={search_term_string}" },
+        "@type":       "SearchAction",
+        "target":      "https://toilet-book.com/map?q={search_term_string}",
         "query-input": "required name=search_term_string",
       },
     },
     {
-      "@type": "Organization",
-      "@id": "https://toilet-book.com/#organization",
-      "name": "Toilet Book",
-      "url": "https://toilet-book.com",
-      "logo": { "@type": "ImageObject", "url": "https://toilet-book.com/apple-icon.png" },
-      "description": "Toilet Book is a crowdsourced restroom rating platform. Users rate and review bathrooms worldwide, documenting cleanliness, accessibility, adult changing stations, family bathrooms, and gender neutral facilities.",
+      "@type":         "MobileApplication",
+      "name":          "Toilet Book",
+      "url":           "https://toilet-book.com",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Any",
+      "description":   "Rate public toilets, find clean bathrooms near you, report accessibility features, and earn FLUSH crypto rewards.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+      },
     },
     {
-      "@type": "MobileApplication",
-      "name": "Toilet Book",
-      "operatingSystem": "iOS, Android",
-      "applicationCategory": "TravelApplication",
-      "description": "Find clean bathrooms near you. Rate toilets, discover adult changing stations, family bathrooms and gender neutral restrooms. Earn FLUSH tokens for every review.",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "@type":     "Organization",
+      "@id":       "https://toilet-book.com/#organization",
+      "name":      "Toilet Book",
+      "url":       "https://toilet-book.com",
+      "logo":      "https://toilet-book.com/logo.png",
+      "contactPoint": {
+        "@type":             "ContactPoint",
+        "email":             "toiletbookmain@gmail.com",
+        "contactType":       "customer support",
+        "availableLanguage": "English",
+      },
     },
   ],
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Toilet Book" />
-        <link rel="apple-touch-icon" href="/apple-icon.png" />
+        {/* JSON-LD structured data */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* Preconnect for performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://dltanpkvuxomubasfepm.supabase.co" />
       </head>
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           {children}
-          <Toaster position="bottom-center" />
+          <Toaster
+            position="bottom-center"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                borderRadius: "12px",
+                background:   "#0f172a",
+                color:        "#f1f5f9",
+                border:       "1px solid rgba(255,255,255,0.1)",
+              },
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>

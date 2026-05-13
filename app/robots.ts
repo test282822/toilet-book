@@ -8,12 +8,11 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/api/",
-          "/_next/",
-          "/admin/",
+          "/dashboard",  // internal analytics — not for public indexing
         ],
       },
     ],
     sitemap: "https://toilet-book.com/sitemap.xml",
-    host: "https://toilet-book.com",
+    host:    "https://toilet-book.com",
   }
 }
