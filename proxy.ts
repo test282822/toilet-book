@@ -3,6 +3,10 @@ import type { NextRequest } from "next/server"
 
 // ── Flip / basic phone UA patterns ───────────────────────────────
 const FLIP_PATTERNS = [
+  // ── Orbic Journey V (RC2200L) — Verizon flip phone ──
+  /RC2200L/i,
+  /Orbic/i,
+  /ORB2200/i,
   /KDDI/i,
   /Nokia/i,
   /SonyEricsson/i,
