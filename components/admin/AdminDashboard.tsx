@@ -1,5 +1,6 @@
 "use client"
 import React, { useState, useEffect } from "react"
+import { AdminLiveMap } from "@/components/admin/AdminLiveMap"
 import {
   Users, Star, MapPin, Flag, TrendingUp, Toilet,
   Eye, AlertTriangle, Globe, Zap, Clock,
@@ -273,6 +274,13 @@ export function AdminDashboard({ data }: { data: any }) {
             </tbody>
           </table>
         </div>
+
+        {/* Live activity map */}
+        <AdminLiveMap
+          liveActivity={data.liveActivity || []}
+          activityFeed={data.activityFeed || []}
+          recentSignups={data.recentSignups || []}
+        />
 
         {/* Quick links */}
         <div className="rounded-xl bg-slate-900 border border-slate-800 p-5">

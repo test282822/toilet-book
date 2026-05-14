@@ -44,6 +44,22 @@ async function getAdminStats() {
     .order("created_at", { ascending: false })
     .limit(10)
 
+  // Live activity — last 100 posts with GPS for map pins
+  const { data: liveActivity } = await supabase
+    .from("posts")
+    .select("id, rating, store_name, created_at, location_lat, location_lng, source, country")
+    .not("location_lat", "is", null)
+    .not("location_lng", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(100)
+
+  // Recent signups for activity feed
+  const { data: recentSignups } = await supabase
+    .from("profiles")
+    .select("id, username, created_at")
+    .order("created_at", { ascending: false })
+    .limit(20)
+
   // Top users by flush balance
   const { data: topUsers } = await supabase
     .from("profiles")
@@ -58,6 +74,20 @@ async function getAdminStats() {
     .eq("moderation_status", "flagged")
     .order("created_at", { ascending: false })
     .limit(20)
+
+  // Merge activity into timeline events
+  const activityFeed = [
+    ...(recentSignups ?? []).map((u: any) => ({
+      type: "signup", username: u.username, created_at: u.created_at,
+      lat: null, lng: null, country: null
+    })),
+    ...(recentPosts ?? []).map((p: any) => ({
+      type: "post", username: null, store_name: p.store_name,
+      rating: p.rating, created_at: p.created_at,
+      lat: p.location_lat, lng: p.location_lng,
+      country: p.country, source: p.source
+    })),
+  ].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 30)
 
   return {
     metrics: {
@@ -76,9 +106,12 @@ async function getAdminStats() {
       whitelistCount:  whitelistCount  ?? 0,
       flaggedCount:    flaggedPosts?.length ?? 0,
     },
-    recentPosts:  recentPosts  ?? [],
-    topUsers:     topUsers     ?? [],
-    flaggedPosts: flaggedPosts ?? [],
+    recentPosts:   recentPosts   ?? [],
+    topUsers:      topUsers      ?? [],
+    flaggedPosts:  flaggedPosts  ?? [],
+    liveActivity:  liveActivity  ?? [],
+    activityFeed:  activityFeed,
+    recentSignups: recentSignups ?? [],
   }
 }
 
