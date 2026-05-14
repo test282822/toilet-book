@@ -193,62 +193,75 @@ export function AdminLiveMap() {
           style={{ background: "#0d1b2a" }}
           onMouseLeave={() => setHovered(null)}
         >
-          {/* Inline SVG US map — no external deps */}
+          {/* Inline SVG US map */}
           <svg
             viewBox="0 0 960 600"
             className="w-full block"
-            style={{ opacity: 0.75 }}
+            style={{ opacity: 0.85 }}
             aria-hidden="true"
           >
-            {/* Ocean */}
             <rect width="960" height="600" fill="#0d1b2a"/>
-            {/* Land mass — continental US rough outline */}
-            <path fill="#1e3a4a" stroke="#2d5a6e" strokeWidth="1.5" d="
-              M180,80 L220,60 L290,55 L360,50 L430,48 L500,50 L560,52
-              L620,50 L680,48 L740,52 L790,58 L830,65 L860,75 L880,90
-              L890,110 L885,130 L870,150 L865,170 L875,190 L880,210
-              L870,230 L855,245 L840,255 L830,270 L825,285
-              L840,295 L850,310 L845,325 L830,335 L810,340
-              L790,335 L775,320 L760,310 L740,320 L720,330
-              L700,340 L685,355 L680,375 L690,395 L700,415
-              L695,435 L680,450 L660,460 L640,455 L620,440
-              L600,430 L575,435 L555,450 L540,465 L530,480
-              L515,490 L495,488 L480,478 L465,465 L450,455
-              L435,450 L415,448 L395,452 L375,460 L355,468
-              L335,470 L315,465 L295,455 L280,442 L265,428
-              L250,415 L238,400 L228,385 L218,368 L210,350
-              L200,332 L192,315 L185,298 L178,280 L172,262
-              L165,244 L158,225 L152,205 L148,185 L145,165
-              L142,145 L140,125 L142,108 L150,92 L165,83 Z
-            "/>
-            {/* Florida peninsula */}
-            <path fill="#1e3a4a" stroke="#2d5a6e" strokeWidth="1.5" d="
-              M640,455 L650,470 L658,488 L662,508 L658,528
-              L648,545 L635,555 L620,558 L607,550 L598,535
-              L592,518 L590,500 L595,482 L604,468 L615,458 Z
-            "/>
-            {/* Great Lakes rough */}
-            <ellipse cx="640" cy="165" rx="18" ry="12" fill="#0d1b2a" opacity="0.8"/>
-            <ellipse cx="680" cy="145" rx="22" ry="10" fill="#0d1b2a" opacity="0.8"/>
-            <ellipse cx="720" cy="155" rx="14" ry="8"  fill="#0d1b2a" opacity="0.8"/>
-            <ellipse cx="750" cy="140" rx="12" ry="7"  fill="#0d1b2a" opacity="0.8"/>
-            {/* State grid lines — approximate */}
-            {[
-              "M420,48 L410,340", "M530,50 L518,340", "M640,50 L628,340",
-              "M750,52 L738,300", "M290,55 L282,340",
-              "M142,180 L860,175", "M145,260 L855,252", "M148,335 L840,330",
-            ].map((d,i) => (
-              <path key={i} d={d} fill="none" stroke="#1d4060" strokeWidth="0.6" opacity="0.6"/>
+
+            {/* Continental US — single connected path including Florida */}
+            <path
+              fill="#1a3346"
+              stroke="#2a5068"
+              strokeWidth="1.8"
+              strokeLinejoin="round"
+              d="
+                M155,92 L168,78 L188,68 L218,60 L258,54 L310,50
+                L370,47 L432,45 L495,46 L548,48 L598,47 L648,46
+                L698,48 L742,50 L778,55 L808,62 L832,72 L850,84
+                L862,98 L868,114 L864,132 L854,150 L848,168
+                L855,186 L862,205 L860,224 L850,242 L836,256
+                L824,268 L818,282 L826,296 L836,312 L832,328
+                L818,338 L800,342 L780,336 L762,322 L748,314
+                L732,320 L716,330 L700,342 L688,358 L682,376
+                L688,396 L696,414 L692,432 L678,446 L662,455
+                L648,458 L644,466 L650,482 L655,500 L650,518
+                L640,534 L626,544 L612,548 L598,542 L588,528
+                L583,512 L585,496 L592,480 L600,466 L608,458
+                L596,452 L576,448 L554,452 L534,462 L516,476
+                L500,488 L482,492 L464,484 L448,470 L432,458
+                L412,452 L390,454 L368,462 L346,468 L324,468
+                L302,460 L282,448 L264,432 L248,414 L234,396
+                L222,376 L212,356 L202,334 L193,312 L184,290
+                L175,268 L167,246 L160,222 L155,198 L150,174
+                L146,150 L143,128 L144,108 L150,96 Z
+              "
+            />
+
+            {/* State divider lines — subtle grid */}
+            {([
+              "M310,50 L305,342","M432,45 L425,342","M548,48 L540,342",
+              "M648,46 L638,330","M742,50 L732,290",
+              "M144,165 L862,158","M148,245 L854,236","M152,320 L836,312",
+            ] as string[]).map((d,i) => (
+              <path key={i} d={d} fill="none" stroke="#1e4560" strokeWidth="0.7" opacity="0.5"/>
             ))}
-            {/* City dots */}
-            {[
-              {x:780,y:220,label:"NYC"},{x:280,y:290,label:"LA"},{x:620,y:190,label:"CHI"},
-              {x:480,y:370,label:"HOU"},{x:720,y:410,label:"MIA"},{x:208,y:148,label:"SEA"},
-              {x:670,y:320,label:"ATL"},{x:310,y:200,label:"DEN"},{x:800,y:200,label:"BOS"},
-            ].map(({x,y,label}) => (
+
+            {/* Great Lakes — small and subtle */}
+            <ellipse cx="652" cy="162" rx="10" ry="6"  fill="#0d1b2a" opacity="0.7"/>
+            <ellipse cx="678" cy="150" rx="13" ry="6"  fill="#0d1b2a" opacity="0.7"/>
+            <ellipse cx="706" cy="156" rx="8"  ry="5"  fill="#0d1b2a" opacity="0.7"/>
+            <ellipse cx="728" cy="146" rx="7"  ry="4"  fill="#0d1b2a" opacity="0.7"/>
+            <ellipse cx="748" cy="150" rx="9"  ry="5"  fill="#0d1b2a" opacity="0.7"/>
+
+            {/* City reference dots */}
+            {([
+              {x:798,y:218,label:"NYC"},
+              {x:222,y:296,label:"LA"},
+              {x:634,y:190,label:"CHI"},
+              {x:486,y:374,label:"HOU"},
+              {x:724,y:418,label:"MIA"},
+              {x:174,y:136,label:"SEA"},
+              {x:672,y:328,label:"ATL"},
+              {x:328,y:204,label:"DEN"},
+              {x:820,y:198,label:"BOS"},
+            ] as {x:number,y:number,label:string}[]).map(({x,y,label}) => (
               <g key={label}>
-                <circle cx={x} cy={y} r="3" fill="#334d5c"/>
-                <text x={x+5} y={y+4} fontSize="9" fill="#4a6778" fontFamily="monospace">{label}</text>
+                <circle cx={x} cy={y} r="2.5" fill="#2d5068"/>
+                <text x={x+4} y={y+4} fontSize="8" fill="#3d6880" fontFamily="monospace">{label}</text>
               </g>
             ))}
           </svg>
