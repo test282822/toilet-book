@@ -276,11 +276,7 @@ export function AdminDashboard({ data }: { data: any }) {
         </div>
 
         {/* Live activity map */}
-        <AdminLiveMap
-          liveActivity={data.liveActivity || []}
-          activityFeed={data.activityFeed || []}
-          recentSignups={data.recentSignups || []}
-        />
+        <AdminLiveMap />
 
         {/* Quick links */}
         <div className="rounded-xl bg-slate-900 border border-slate-800 p-5">
