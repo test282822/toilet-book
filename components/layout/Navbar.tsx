@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useEffect } from "react"
 import { Toilet, Plus, LogIn, LogOut, User, Menu, X, MapPin, ShoppingBag, Zap, ChevronDown, Star, Accessibility, Plane, Navigation, Building2, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,10 +13,24 @@ import toast from "react-hot-toast"
 
 interface NavbarProps { profile: Profile | null }
 
-export function Navbar({ profile }: NavbarProps) {
+import { Suspense } from "react"
+
+function NavbarInner({ profile }: NavbarProps) {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const [postModalOpen, setPostModalOpen] = useState(false)
+  const searchParams = useSearchParams()
+
+  // Auto-open post modal when ?post=true in URL
+  useEffect(() => {
+    if (searchParams.get("post") === "true" && profile) {
+      setPostModalOpen(true)
+      // Clean the URL without reload
+      const url = new URL(window.location.href)
+      url.searchParams.delete("post")
+      window.history.replaceState({}, "", url.toString())
+    }
+  }, [searchParams, profile])
   const [showBestBy, setShowBestBy] = useState(false)
   const initials = profile?.username?.slice(0, 2).toUpperCase() ?? "?"
 
@@ -170,9 +184,9 @@ export function Navbar({ profile }: NavbarProps) {
                     >
                       <Zap className="h-4 w-4 text-amber-400" />
                       <span>FLUSH Tokens</span>
-                      {profile.flush_balance !== undefined && profile.flush_balance > 0 && (
+                      {profile.flush_balance != null && profile.flush_balance > 0 && (
                         <span className="ml-auto text-xs font-semibold text-amber-500 bg-amber-50 dark:bg-amber-950/30 px-1.5 py-0.5 rounded-full">
-                          {profile.flush_balance.toLocaleString()}
+                          {(profile.flush_balance ?? 0).toLocaleString()}
                         </span>
                       )}
                     </Link>
@@ -267,9 +281,9 @@ export function Navbar({ profile }: NavbarProps) {
                 >
                   <Zap className="h-4 w-4 text-amber-400" />
                   FLUSH Tokens
-                  {profile.flush_balance !== undefined && profile.flush_balance > 0 && (
+                  {profile.flush_balance != null && profile.flush_balance > 0 && (
                     <span className="ml-auto text-xs font-semibold text-amber-500">
-                      {profile.flush_balance.toLocaleString()}
+                      {(profile.flush_balance ?? 0).toLocaleString()}
                     </span>
                   )}
                 </Link>
@@ -424,5 +438,13 @@ export function Navbar({ profile }: NavbarProps) {
         />
       )}
     </>
+  )
+}
+
+export function Navbar({ profile }: NavbarProps) {
+  return (
+    <Suspense fallback={null}>
+      <NavbarInner profile={profile} />
+    </Suspense>
   )
 }
