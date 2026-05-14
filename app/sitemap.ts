@@ -21,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/best-airport-bathrooms`,           lastModified: now, changeFrequency: "weekly",  priority: 0.85 },
     { url: `${BASE}/find-public-bathrooms-near-me`,    lastModified: now, changeFrequency: "daily",   priority: 0.9  },
     { url: `${BASE}/adult-changing-stations-near-me`,  lastModified: now, changeFrequency: "weekly",  priority: 0.88 },
+    { url: `${BASE}/leaderboard`, lastModified: now, changeFrequency: 'daily',   priority: 0.85 },
     // Install page
     { url: `${BASE}/install`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     // Business pages

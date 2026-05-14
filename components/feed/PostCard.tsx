@@ -5,7 +5,7 @@ import Link from "next/link"
 import {
   Heart, Clock, Flag,
   Accessibility, Users, ShieldCheck,
-  Droplets, Wind, Lock, Baby, ParkingCircle
+  Droplets, Wind, Lock, Baby, ParkingCircle, XCircle
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { StarRating } from "@/components/feed/StarRating"
@@ -51,7 +51,17 @@ function getFacilityBadges(post: FeedPost) {
   if (post.address)
     badges.push({ icon: <ParkingCircle className="h-3 w-3" />, label: "Location tagged", color: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" })
 
-  return badges.slice(0, 5) // max 5 badges per card
+  // New fields
+  if (post.bathroom_type === "single")
+    badges.push({ icon: <Lock className="h-3 w-3" />, label: "Private single stall", color: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300" })
+  if (post.has_hygiene_products)
+    badges.push({ icon: <Droplets className="h-3 w-3" />, label: "Hygiene products", color: "bg-pink-50 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300" })
+  if (post.is_open_247)
+    badges.push({ icon: <Clock className="h-3 w-3" />, label: "Open 24/7", color: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" })
+  if (post.is_permanently_closed)
+    badges.push({ icon: <XCircle className="h-3 w-3" />, label: "Permanently closed", color: "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300" })
+
+  return badges.slice(0, 6) // max 5 badges per card
 }
 
 export function PostCard({ post, currentUserId }: PostCardProps) {
@@ -195,6 +205,14 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
               </span>
             ))}
           </div>
+        )}
+
+        {/* Opening hours if set */}
+        {post.opening_hours && !post.is_open_247 && (
+          <p className="text-xs text-slate-400 flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {post.opening_hours}
+          </p>
         )}
 
         {/* Google Maps link if available */}

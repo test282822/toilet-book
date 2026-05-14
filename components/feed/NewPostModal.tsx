@@ -82,6 +82,12 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
   const [hasFamilyBathroom, setHasFamilyBathroom] = useState(false)
   const [hasGenderNeutral, setHasGenderNeutral]   = useState(false)
   const [isFamilyFriendly, setIsFamilyFriendly]  = useState<boolean | null>(null)
+  const [bathroomType, setBathroomType]           = useState<string>("unknown")
+  const [isSingleStall, setIsSingleStall]         = useState(false)
+  const [hasHygieneProducts, setHasHygieneProducts] = useState(false)
+  const [openingHours, setOpeningHours]           = useState("")
+  const [isOpen247, setIsOpen247]                 = useState(false)
+  const [isPermanentlyClosed, setIsPermanentlyClosed] = useState(false)
   const [loading, setLoading]                     = useState(false)
   const [moderation, setModeration]               = useState<ModerationState>("idle")
   const [moderationReason, setModerationReason]   = useState("")
@@ -206,6 +212,12 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
         has_family_bathroom:        hasFamilyBathroom,
         has_gender_neutral:         hasGenderNeutral,
         is_family_friendly:         isFamilyFriendly,
+        bathroom_type:              bathroomType,
+        is_single_stall:            isSingleStall,
+        has_hygiene_products:       hasHygieneProducts,
+        opening_hours:              openingHours || null,
+        is_open_247:                isOpen247,
+        is_permanently_closed:      isPermanentlyClosed,
       }).select('id').single()
 
       if (insertError) throw insertError
@@ -473,6 +485,92 @@ export function NewPostModal({ open, onOpenChange, userId }: NewPostModalProps) 
               hoverColor="group-hover:border-violet-400"
               flushBadge="+15 FLUSH"
             />
+          </div>
+
+          {/* Bathroom type + hygiene — clean single card */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">🚽</span>
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Bathroom details</p>
+            </div>
+
+            {/* Bathroom type */}
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Type of bathroom</p>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { value: "single",     label: "Single stall", emoji: "🔒" },
+                  { value: "multi",      label: "Multi stall",  emoji: "🚪" },
+                  { value: "portapotty", label: "Port-a-potty", emoji: "🔵" },
+                  { value: "unknown",    label: "Not sure",     emoji: "❓" },
+                ].map(({ value, label, emoji }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setBathroomType(value)}
+                    className={cn(
+                      "flex flex-col items-center gap-1 rounded-xl border py-2.5 px-1 text-xs transition-all",
+                      bathroomType === value
+                        ? "border-sky-400 bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300"
+                        : "border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-300"
+                    )}
+                  >
+                    <span className="text-base">{emoji}</span>
+                    <span className="text-center leading-tight">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Extra flags */}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {[
+                { state: hasHygieneProducts,   setter: () => setHasHygieneProducts(!hasHygieneProducts), label: "🩸 Hygiene products" },
+                { state: isPermanentlyClosed,  setter: () => setIsPermanentlyClosed(!isPermanentlyClosed), label: "🔴 Permanently closed" },
+              ].map(({ state, setter, label }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={setter}
+                  className={cn(
+                    "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
+                    state
+                      ? "border-sky-400 bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300"
+                      : "border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-300"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Opening hours */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-xs text-slate-500 dark:text-slate-400">Opening hours</p>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen247(!isOpen247)}
+                  className={cn(
+                    "rounded-full border px-2.5 py-0.5 text-xs transition-all",
+                    isOpen247
+                      ? "border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                      : "border-slate-200 dark:border-slate-700 text-slate-500"
+                  )}
+                >
+                  24/7
+                </button>
+              </div>
+              {!isOpen247 && (
+                <input
+                  type="text"
+                  placeholder="e.g. 8am–10pm, Mon–Sun"
+                  value={openingHours}
+                  onChange={e => setOpeningHours(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-50 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                />
+              )}
+            </div>
           </div>
 
           {/* Family friendly */}
