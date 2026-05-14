@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
-import { Toilet, Plus, LogIn, LogOut, User, Menu, X, MapPin, ShoppingBag, Zap, ChevronDown, Star, Accessibility, Plane, Navigation, Building2, Sparkles, Mail, Users } from "lucide-react"
+import { Toilet, Plus, LogIn, LogOut, User, Menu, X, MapPin, ShoppingBag, Zap, ChevronDown, Star, Accessibility, Plane, Navigation, Building2, Sparkles, Mail, Users, Gift } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
