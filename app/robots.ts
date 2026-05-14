@@ -9,6 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/api/",
           "/dashboard",  // internal analytics — not for public indexing
+          "/admin",     // admin panel — not for public indexing
         ],
       },
     ],
