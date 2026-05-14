@@ -2,282 +2,186 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=240, initial-scale=1, maximum-scale=1" />
+  <meta name="viewport" content="width=240, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta http-equiv="Cache-Control" content="no-cache" />
   <title>Toilet Book</title>
   <style>
-    /* ── Reset ── */
-    * { margin:0; padding:0; box-sizing:border-box; }
-
-    /* ── Base — works on 128px wide flip screens up to 320px ── */
-    body {
-      background: #000;
-      color: #0ff;
-      font-family: "Courier New", Courier, monospace;
-      font-size: 12px;
-      line-height: 1.4;
-      padding: 2px;
-      max-width: 240px;
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{
+      background:#000;color:#0ff;
+      font-family:"Courier New",Courier,monospace;
+      font-size:12px;line-height:1.5;
+      padding:2px;max-width:240px;
     }
-
-    /* ── Header bar ── */
-    .hdr {
-      background: #006;
-      color: #0ff;
-      text-align: center;
-      padding: 3px 2px;
-      border-bottom: 1px solid #0ff;
-      letter-spacing: 1px;
-      font-size: 10px;
-      font-weight: bold;
+    .hdr{
+      background:#003366;color:#0ff;
+      text-align:center;padding:4px 2px;
+      border-bottom:2px solid #0ff;
+      letter-spacing:1px;
     }
-    .hdr .logo { font-size: 13px; }
-
-    /* ── Sections ── */
-    .section {
-      border: 1px solid #0ff;
-      margin: 3px 0;
-      padding: 3px;
+    .hdr .logo{font-size:14px;font-weight:bold;}
+    .hdr .sub{font-size:9px;color:#88f;}
+    .hdr .usr{font-size:9px;color:#0f0;margin-top:1px;}
+    .gps-bar{
+      background:#001a00;border:1px solid #0f0;
+      color:#0f0;font-size:9px;padding:2px 4px;
+      margin:2px 0;text-align:center;
     }
-    .section-title {
-      background: #003366;
-      color: #0ff;
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 2px 3px;
-      margin: -3px -3px 3px -3px;
-      border-bottom: 1px solid #0ff;
+    .gps-bar.off{border-color:#f00;color:#f00;background:#1a0000;}
+    .gps-bar.searching{border-color:#ff0;color:#ff0;background:#1a1a00;}
+    .section{border:1px solid #0ff;margin:3px 0;padding:3px;}
+    .section-title{
+      background:#003366;color:#0ff;font-size:9px;
+      text-transform:uppercase;letter-spacing:1px;
+      padding:2px 3px;margin:-3px -3px 4px -3px;
+      border-bottom:1px solid #0ff;
     }
-
-    /* ── GPS status ── */
-    .gps-bar {
-      background: #001a00;
-      border: 1px solid #0f0;
-      color: #0f0;
-      font-size: 9px;
-      padding: 2px 4px;
-      margin: 2px 0;
-      text-align: center;
+    a{color:#ff0;text-decoration:none;display:block;
+      padding:3px 2px;border-bottom:1px dotted #333;font-size:12px;}
+    a:last-child{border-bottom:none;}
+    a:before{content:"> ";color:#0ff;}
+    .btn{
+      display:block;width:100%;background:#003;color:#0ff;
+      border:1px solid #0ff;font-family:"Courier New",Courier,monospace;
+      font-size:12px;padding:5px 2px;text-align:center;cursor:pointer;
+      margin:3px 0;letter-spacing:1px;
     }
-    .gps-bar.off { border-color: #f00; color: #f00; background: #1a0000; }
-
-    /* ── Links / nav ── */
-    a {
-      color: #ff0;
-      text-decoration: none;
-      display: block;
-      padding: 3px 2px;
-      border-bottom: 1px dotted #333;
-      font-size: 12px;
+    .btn-rate{background:#030;border-color:#0f0;color:#0f0;}
+    .btn-find{background:#300;border-color:#f80;color:#f80;}
+    .btn-flush{background:#220;border-color:#ff0;color:#ff0;}
+    .btn-danger{background:#300;border-color:#f00;color:#f00;}
+    .btn-photo{background:#020;border-color:#0f0;color:#0f0;font-size:11px;}
+    .star-row{display:flex;justify-content:space-around;margin:4px 0;}
+    .star-btn{
+      background:#000;border:1px solid #555;color:#555;
+      font-size:14px;width:36px;height:28px;cursor:pointer;
+      font-family:monospace;
     }
-    a:last-child { border-bottom: none; }
-    a:before { content: "> "; color: #0ff; }
-
-    /* ── Buttons ── */
-    .btn {
-      display: block;
-      width: 100%;
-      background: #003;
-      color: #0ff;
-      border: 1px solid #0ff;
-      font-family: "Courier New", Courier, monospace;
-      font-size: 12px;
-      padding: 4px 2px;
-      text-align: center;
-      cursor: pointer;
-      margin: 2px 0;
-      letter-spacing: 1px;
+    .star-btn.sel{border-color:#ff0;color:#ff0;background:#111;}
+    input[type=text],input[type=email],input[type=password],select{
+      background:#001;color:#0ff;border:1px solid #0ff;
+      font-family:"Courier New",Courier,monospace;
+      font-size:12px;width:100%;padding:3px 4px;margin:2px 0;
     }
-    .btn-rate  { background: #030; border-color: #0f0; color: #0f0; }
-    .btn-find  { background: #300; border-color: #f80; color: #f80; }
-    .btn-flush { background: #220; border-color: #ff0; color: #ff0; }
-
-    /* ── Star rating ── */
-    .stars { font-size: 14px; letter-spacing: 2px; }
-    .star-row {
-      display: flex;
-      justify-content: space-around;
-      margin: 3px 0;
-    }
-    .star-btn {
-      background: #000;
-      border: 1px solid #555;
-      color: #888;
-      font-size: 13px;
-      width: 28px;
-      height: 22px;
-      cursor: pointer;
-      font-family: monospace;
-    }
-    .star-btn.sel { border-color: #ff0; color: #ff0; background: #111; }
-
-    /* ── Form inputs ── */
-    input[type=text],
-    input[type=number],
-    select,
-    textarea {
-      background: #001;
-      color: #0ff;
-      border: 1px solid #0ff;
-      font-family: "Courier New", Courier, monospace;
-      font-size: 12px;
-      width: 100%;
-      padding: 2px 3px;
-      margin: 2px 0;
-    }
-    textarea { height: 40px; resize: none; }
-    label { color: #88f; font-size: 10px; display: block; margin-top: 3px; }
-
-    /* ── Checkbox row ── */
-    .chk-row {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin: 2px 0;
-      font-size: 10px;
-      color: #0ff;
-    }
-    input[type=checkbox] { width: auto; margin: 0; }
-
-    /* ── Review card ── */
-    .review {
-      border: 1px solid #333;
-      padding: 3px;
-      margin: 2px 0;
-      font-size: 10px;
-    }
-    .review .r-venue { color: #ff0; font-weight: bold; }
-    .review .r-stars { color: #ff0; }
-    .review .r-body  { color: #aaa; margin-top: 2px; }
-    .review .r-time  { color: #555; font-size: 9px; margin-top: 1px; }
-
-    /* ── Stat row ── */
-    .stat {
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px dotted #222;
-      padding: 2px 0;
-      font-size: 10px;
-    }
-    .stat .val { color: #ff0; font-weight: bold; }
-
-    /* ── FLUSH balance ── */
-    .flush-bal {
-      text-align: center;
-      font-size: 18px;
-      color: #ff0;
-      font-weight: bold;
-      padding: 4px 0;
-      letter-spacing: 2px;
-    }
-    .flush-sub { text-align: center; font-size: 9px; color: #888; }
-
-    /* ── Footer ── */
-    .ftr {
-      border-top: 1px solid #333;
-      text-align: center;
-      font-size: 9px;
-      color: #444;
-      padding: 3px 0;
-      margin-top: 4px;
-    }
-
-    /* ── Page visibility — JS toggles ── */
-    .page { display: none; }
-    .page.active { display: block; }
-
-    /* ── Divider ── */
-    .div { border-top: 1px solid #222; margin: 3px 0; }
-
-    /* ── Alert / message ── */
-    .msg {
-      border: 1px solid #0f0;
-      background: #001a00;
-      color: #0f0;
-      font-size: 10px;
-      padding: 3px;
-      margin: 3px 0;
-      text-align: center;
-      display: none;
-    }
-    .msg.err { border-color: #f00; background: #1a0000; color: #f00; }
-    .msg.show { display: block; }
+    input[type=text]:focus,input[type=email]:focus,
+    input[type=password]:focus{outline:none;border-color:#ff0;color:#ff0;}
+    label{color:#88f;font-size:10px;display:block;margin-top:4px;}
+    .chk-row{display:flex;align-items:center;gap:4px;
+      margin:3px 0;font-size:11px;color:#0ff;}
+    input[type=checkbox]{width:auto;margin:0;}
+    .stat{display:flex;justify-content:space-between;
+      border-bottom:1px dotted #222;padding:2px 0;font-size:10px;}
+    .stat .val{color:#ff0;font-weight:bold;}
+    .flush-bal{text-align:center;font-size:20px;color:#ff0;
+      font-weight:bold;padding:4px 0;letter-spacing:2px;}
+    .flush-sub{text-align:center;font-size:9px;color:#888;}
+    .ftr{border-top:1px solid #333;text-align:center;
+      font-size:9px;color:#444;padding:3px 0;margin-top:4px;}
+    .page{display:none;}
+    .page.active{display:block;}
+    .div{border-top:1px solid #222;margin:4px 0;}
+    .msg{border:1px solid #0f0;background:#001a00;color:#0f0;
+      font-size:10px;padding:3px;margin:3px 0;text-align:center;display:none;}
+    .msg.err{border-color:#f00;background:#1a0000;color:#f00;}
+    .msg.warn{border-color:#ff0;background:#1a1a00;color:#ff0;}
+    .msg.show{display:block;}
+    /* Photo preview */
+    .photo-wrap{margin:3px 0;}
+    .photo-wrap img{width:100%;max-height:100px;object-fit:cover;
+      border:1px solid #0ff;display:block;}
+    /* Device tag badge */
+    .device-tag{font-size:9px;color:#555;text-align:right;padding:1px 2px;}
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     HEADER — always visible
-══════════════════════════════════════════ -->
+<!-- HEADER -->
 <div class="hdr">
   <div class="logo">[ TOILET BOOK ]</div>
-  <div style="font-size:9px;color:#88f">bathroom ratings + crypto</div>
+  <div class="sub">rate bathrooms · earn FLUSH</div>
+  <div class="usr" id="hdr-user"></div>
+</div>
+<div class="gps-bar off" id="gps-bar">GPS: OFF</div>
+<div class="device-tag" id="device-tag"></div>
+
+<!-- ═══════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════ -->
+<div class="page active" id="pg-login">
+  <div class="section">
+    <div class="section-title">TOILET BOOK LOGIN</div>
+    <div class="msg" id="login-msg"></div>
+    <label>EMAIL</label>
+    <input type="email" id="l-email" placeholder="you@email.com" autocomplete="email" />
+    <label>PASSWORD</label>
+    <input type="password" id="l-pass" placeholder="password" autocomplete="current-password" />
+    <button class="btn btn-rate" onclick="doLogin()">[ LOGIN ]</button>
+    <div class="div"></div>
+    <a href="#" onclick="go('pg-signup')">CREATE ACCOUNT</a>
+    <a href="#" onclick="go('pg-about')">ABOUT TOILET BOOK</a>
+  </div>
+  <div class="flush-sub" style="margin-top:4px;">
+    toilet-book.com
+  </div>
 </div>
 
-<!-- GPS status bar -->
-<div class="gps-bar off" id="gps-bar">GPS: OFF</div>
+<!-- ═══════════════════════════════
+     SIGNUP PAGE
+═══════════════════════════════ -->
+<div class="page" id="pg-signup">
+  <div class="section">
+    <div class="section-title">CREATE ACCOUNT</div>
+    <div class="msg" id="signup-msg"></div>
+    <label>USERNAME</label>
+    <input type="text" id="su-user" placeholder="toiletmaster99" maxlength="30" />
+    <label>EMAIL</label>
+    <input type="email" id="su-email" placeholder="you@email.com" autocomplete="email" />
+    <label>PASSWORD</label>
+    <input type="password" id="su-pass" placeholder="min 6 chars" autocomplete="new-password" />
+    <button class="btn btn-rate" onclick="doSignup()">[ CREATE ACCOUNT ]</button>
+    <div class="div"></div>
+    <div style="font-size:9px;color:#555;text-align:center;">
+      By signing up you earn 50 FLUSH<br/>tokens as a welcome bonus!
+    </div>
+    <div class="div"></div>
+    <a href="#" onclick="go('pg-login')">BACK TO LOGIN</a>
+  </div>
+</div>
 
-<!-- ══════════════════════════════════════════
-     MAIN MENU — page 0
-══════════════════════════════════════════ -->
-<div class="page active" id="pg-menu">
+<!-- ═══════════════════════════════
+     MAIN MENU
+═══════════════════════════════ -->
+<div class="page" id="pg-menu">
   <div class="section">
     <div class="section-title">MAIN MENU</div>
-    <a href="#" onclick="go('pg-find')">FIND TOILET NEAR ME</a>
     <a href="#" onclick="go('pg-rate')">RATE A BATHROOM</a>
-    <a href="#" onclick="go('pg-feed')">LATEST REVIEWS</a>
+    <a href="#" onclick="go('pg-find')">FIND TOILET NEAR ME</a>
     <a href="#" onclick="go('pg-flush')">MY FLUSH TOKENS</a>
     <a href="#" onclick="go('pg-about')">ABOUT</a>
+    <a href="#" onclick="doLogout()">LOGOUT</a>
   </div>
-
-  <!-- Quick stats -->
   <div class="section">
     <div class="section-title">LIVE STATS</div>
-    <div class="stat"><span>Toilets mapped</span><span class="val" id="stat-total">47K+</span></div>
+    <div class="stat"><span>Toilets mapped</span><span class="val" id="stat-total">--</span></div>
     <div class="stat"><span>Reviews posted</span><span class="val" id="stat-reviews">--</span></div>
-    <div class="stat"><span>Members</span><span class="val" id="stat-users">--</span></div>
+    <div class="stat"><span>My FLUSH</span><span class="val" id="stat-myflush">--</span></div>
     <div class="stat"><span>Token launch</span><span class="val">28 AUG 26</span></div>
   </div>
-
-  <button class="btn btn-rate" onclick="go('pg-rate')">[ + RATE A TOILET ]</button>
-  <button class="btn btn-find" onclick="startGPS()">[ GPS FIND NEAR ME ]</button>
+  <button class="btn btn-rate" onclick="go('pg-rate')">[ + RATE A TOILET NOW ]</button>
 </div>
 
-<!-- ══════════════════════════════════════════
-     FIND PAGE — page 1
-══════════════════════════════════════════ -->
-<div class="page" id="pg-find">
-  <div class="section">
-    <div class="section-title">&lt; FIND TOILET</div>
-
-    <div id="find-gps-msg" class="msg">Getting your GPS location...</div>
-
-    <div id="find-results">
-      <div style="color:#888;font-size:10px;padding:4px 0;">
-        Press GPS button to find toilets near you.
-      </div>
-    </div>
-
-    <button class="btn btn-find" onclick="startGPS()" style="margin-top:4px">[ GET GPS LOCATION ]</button>
-    <div class="div"></div>
-    <button class="btn" onclick="go('pg-menu')">[ BACK ]</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════
-     RATE PAGE — page 2
-══════════════════════════════════════════ -->
+<!-- ═══════════════════════════════
+     RATE PAGE
+═══════════════════════════════ -->
 <div class="page" id="pg-rate">
   <div class="section">
     <div class="section-title">&lt; RATE A BATHROOM</div>
-
-    <div id="rate-msg" class="msg"></div>
+    <div class="msg" id="rate-msg"></div>
 
     <label>VENUE NAME (optional)</label>
-    <input type="text" id="r-venue" placeholder="e.g. McDonalds Main St" maxlength="60" />
+    <input type="text" id="r-venue" placeholder="e.g. Walmart Main St" maxlength="60" />
 
-    <label>CLEANLINESS (1-5 stars)</label>
+    <label>CLEANLINESS RATING</label>
     <div class="star-row">
       <button class="star-btn" onclick="setStar(1)" id="s1">1</button>
       <button class="star-btn" onclick="setStar(2)" id="s2">2</button>
@@ -288,135 +192,344 @@
     <div id="star-label" style="text-align:center;font-size:10px;color:#ff0;min-height:14px;"></div>
 
     <div class="div"></div>
-
-    <label>FACILITIES</label>
+    <label>FACILITIES (+FLUSH BONUS)</label>
     <div class="chk-row">
       <input type="checkbox" id="r-adult" />
-      <span>Adult changing table (+25 FLUSH)</span>
+      <span>Adult changing station (+25)</span>
     </div>
     <div class="chk-row">
       <input type="checkbox" id="r-family" />
-      <span>Family bathroom (+15 FLUSH)</span>
+      <span>Family bathroom (+15)</span>
     </div>
     <div class="chk-row">
       <input type="checkbox" id="r-neutral" />
-      <span>Gender neutral (+15 FLUSH)</span>
+      <span>Gender neutral (+15)</span>
     </div>
 
     <div class="div"></div>
+    <label>PHOTO (optional)</label>
 
-    <label>NOTES (optional)</label>
-    <textarea id="r-notes" placeholder="Clean? Smelly? Paper stocked?"></textarea>
-
-    <div class="div"></div>
-
-    <div style="font-size:9px;color:#888;margin:2px 0;">
-      GPS will be captured on submit.
+    <!-- photo preview -->
+    <div class="photo-wrap" id="photo-preview" style="display:none;">
+      <img id="photo-img" src="" alt="preview" />
+      <button class="btn" onclick="clearPhoto()" style="font-size:9px;padding:2px;margin-top:2px;">
+        [ REMOVE PHOTO ]
+      </button>
     </div>
 
-    <button class="btn btn-rate" onclick="submitRate()">[ SUBMIT REVIEW ]</button>
+    <!-- photo buttons -->
+    <div id="photo-btns">
+      <!-- camera button — opens camera directly on Orbic -->
+      <label for="photo-cam" class="btn btn-photo" style="cursor:pointer;">
+        [ TAKE PHOTO ]
+      </label>
+      <input type="file" id="photo-cam" accept="image/*" capture="environment"
+             style="display:none;" onchange="handlePhoto(this)" />
+
+      <!-- gallery button — choose from files -->
+      <label for="photo-gal" class="btn" style="cursor:pointer;font-size:11px;margin-top:2px;">
+        [ CHOOSE FROM GALLERY ]
+      </label>
+      <input type="file" id="photo-gal" accept="image/*"
+             style="display:none;" onchange="handlePhoto(this)" />
+    </div>
+
+    <div id="photo-status" style="font-size:9px;color:#888;min-height:12px;margin:2px 0;"></div>
+
+    <div class="div"></div>
+    <div style="font-size:9px;color:#555;margin:2px 0;">GPS captured automatically on submit.</div>
+
+    <button class="btn btn-rate" onclick="submitRate()">[ SUBMIT + EARN FLUSH ]</button>
     <button class="btn" onclick="go('pg-menu')">[ BACK ]</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     FEED PAGE — page 3
-══════════════════════════════════════════ -->
-<div class="page" id="pg-feed">
+<!-- ═══════════════════════════════
+     FIND PAGE
+═══════════════════════════════ -->
+<div class="page" id="pg-find">
   <div class="section">
-    <div class="section-title">&lt; LATEST REVIEWS</div>
-    <div id="feed-list">
-      <div style="color:#888;font-size:10px;padding:4px 0;">Loading reviews...</div>
+    <div class="section-title">&lt; FIND TOILET</div>
+    <div id="find-msg" class="msg"></div>
+    <div id="find-results">
+      <div style="color:#888;font-size:10px;padding:4px 0;">
+        Press button to find toilets near you.
+      </div>
     </div>
+    <button class="btn btn-find" onclick="startGPS(true)">[ GPS FIND NEAR ME ]</button>
     <div class="div"></div>
-    <button class="btn" onclick="loadFeed()">[ REFRESH ]</button>
     <button class="btn" onclick="go('pg-menu')">[ BACK ]</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     FLUSH PAGE — page 4
-══════════════════════════════════════════ -->
+<!-- ═══════════════════════════════
+     FLUSH PAGE
+═══════════════════════════════ -->
 <div class="page" id="pg-flush">
   <div class="section">
     <div class="section-title">&lt; FLUSH TOKENS</div>
-
-    <div class="flush-bal" id="flush-bal">-- FLUSH</div>
-    <div class="flush-sub">Your current balance</div>
-
+    <div class="flush-bal" id="flush-bal">-- pts</div>
+    <div class="flush-sub" id="flush-tokens-display">= -- FLUSH tokens</div>
     <div class="div"></div>
-
-    <div class="stat"><span>Sign up</span><span class="val">+50 pts</span></div>
+    <div class="stat"><span>Sign up bonus</span><span class="val">+50 pts</span></div>
     <div class="stat"><span>Per review</span><span class="val">+10 pts</span></div>
     <div class="stat"><span>First review</span><span class="val">+15 pts</span></div>
     <div class="stat"><span>Adult station</span><span class="val">+25 pts</span></div>
     <div class="stat"><span>Family room</span><span class="val">+15 pts</span></div>
     <div class="stat"><span>Gender neutral</span><span class="val">+15 pts</span></div>
     <div class="stat"><span>Referral</span><span class="val">+50 pts</span></div>
-
     <div class="div"></div>
-
-    <div style="font-size:9px;color:#888;text-align:center;margin:3px 0;">
+    <div style="font-size:9px;color:#888;text-align:center;line-height:1.6;">
       1 pt = 10 FLUSH tokens<br/>
-      Token launch: 28 AUG 2026<br/>
-      Solana SPL · 1 billion supply
+      Launch: 28 AUG 2026 · Solana SPL<br/>
+      1,000,000,000 total supply
     </div>
-
     <div class="div"></div>
     <button class="btn" onclick="go('pg-menu')">[ BACK ]</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     ABOUT PAGE — page 5
-══════════════════════════════════════════ -->
+<!-- ═══════════════════════════════
+     ABOUT PAGE
+═══════════════════════════════ -->
 <div class="page" id="pg-about">
   <div class="section">
     <div class="section-title">&lt; ABOUT</div>
-    <div style="font-size:10px;color:#aaa;line-height:1.6;">
-      <p>TOILET BOOK is the world's first community toilet rating platform with crypto rewards.</p>
+    <div style="font-size:10px;color:#aaa;line-height:1.7;">
+      <p style="color:#0ff;">TOILET BOOK</p>
+      <p>World's first community toilet rating platform with crypto rewards.</p>
       <div class="div"></div>
       <p>Rate bathrooms. Earn FLUSH tokens. Help everyone find a clean public toilet.</p>
       <div class="div"></div>
-      <p style="color:#0ff;">47,000+ locations mapped worldwide.</p>
+      <p style="color:#ff0;">47,000+ locations mapped worldwide.</p>
       <div class="div"></div>
-      <p>FLUSH token launches on Solana: 28 AUG 2026</p>
+      <p>FLUSH token · Solana · 28 AUG 2026</p>
       <div class="div"></div>
-      <p style="color:#888;">toilet-book.com<br/>toiletbookmain@gmail.com</p>
+      <p style="color:#555;">toilet-book.com<br/>toiletbookmain@gmail.com</p>
     </div>
     <div class="div"></div>
-    <button class="btn" onclick="go('pg-menu')">[ BACK ]</button>
+    <button class="btn" onclick="history.back()">[ BACK ]</button>
   </div>
 </div>
 
-<!-- FOOTER -->
-<div class="ftr">toilet-book.com | v1.0-flip</div>
+<div class="ftr" id="ftr">toilet-book.com | flip v2.0</div>
 
-<!-- ══════════════════════════════════════════
-     MINIMAL JS — only essentials
-══════════════════════════════════════════ -->
+<!-- ═══════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════ -->
 <script>
-// ── Config ──────────────────────────────────
+// ── Config ─────────────────────────────────────────────
 var SB_URL = 'https://dltanpkvuxomubasfepm.supabase.co'
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsdGFucGt2dXhvbXViYXNmZXBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2NzA0MDIsImV4cCI6MjA2MjI0NjQwMn0.OvKfrUk6NwOekM1XJ9MP7A_768VkjMu0tDhV7W5tKbc'
-var HDR = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+var HDR    = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
 
-var curStar = 0
-var gpsLat  = null
-var gpsLng  = null
+// ── State ───────────────────────────────────────────────
+var curStar    = 0
+var gpsLat     = null
+var gpsLng     = null
+var authToken  = null
+var currentUser= null
+var photoFile  = null
+var deviceInfo = {}
 
-// ── Page navigation ──────────────────────────
-function go(id) {
-  var pages = document.querySelectorAll('.page')
-  for (var i = 0; i < pages.length; i++) {
-    pages[i].className = 'page'
+// ── Device detection — personalise per device ───────────
+function detectDevice() {
+  var ua  = navigator.userAgent || ''
+  var info = {}
+
+  if (/RC2200L/i.test(ua) || /Orbic/i.test(ua)) {
+    info.name    = 'Orbic Journey V'
+    info.short   = 'RC2200L'
+    info.screen  = '240x320'
+    info.note    = 'Verizon Flip'
+  } else if (/iPhone/i.test(ua)) {
+    info.name = 'iPhone'
+    info.short= 'iOS'
+  } else if (/Android/i.test(ua)) {
+    info.name = 'Android'
+    info.short= 'Android'
+  } else {
+    info.name = 'Browser'
+    info.short= 'Web'
   }
-  document.getElementById(id).className = 'page active'
-  if (id === 'pg-feed') loadFeed()
+
+  info.ua = ua.substring(0, 40)
+  deviceInfo = info
+
+  var tag = document.getElementById('device-tag')
+  if (tag && info.short) tag.innerHTML = '[' + info.short + ']'
 }
 
-// ── Star rating ──────────────────────────────
-var STAR_LABELS = ['', 'AVOID', 'BELOW AVG', 'DECENT', 'PRETTY GOOD', 'SPOTLESS!']
+// ── Page nav ────────────────────────────────────────────
+function go(id) {
+  var pages = document.querySelectorAll('.page')
+  for (var i = 0; i < pages.length; i++) pages[i].className = 'page'
+  document.getElementById(id).className = 'page active'
+  window.scrollTo(0, 0)
+}
+
+// ── Auth helpers ────────────────────────────────────────
+function getAuthHdr() {
+  return {
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + (authToken || SB_KEY),
+    'Content-Type': 'application/json'
+  }
+}
+
+function saveSession(token, user) {
+  authToken   = token
+  currentUser = user
+  try {
+    localStorage.setItem('tb_token', token)
+    localStorage.setItem('tb_user',  JSON.stringify(user))
+  } catch(e) {}
+  updateHeader()
+}
+
+function clearSession() {
+  authToken   = null
+  currentUser = null
+  try {
+    localStorage.removeItem('tb_token')
+    localStorage.removeItem('tb_user')
+  } catch(e) {}
+  updateHeader()
+}
+
+function updateHeader() {
+  var el = document.getElementById('hdr-user')
+  if (currentUser && currentUser.email) {
+    var name = (currentUser.user_metadata && currentUser.user_metadata.username)
+      ? currentUser.user_metadata.username
+      : currentUser.email.split('@')[0]
+    el.innerHTML = 'Hi ' + name + ' | ' + (deviceInfo.note || deviceInfo.short || '')
+  } else {
+    el.innerHTML = ''
+  }
+}
+
+function loadSession() {
+  try {
+    var t = localStorage.getItem('tb_token')
+    var u = localStorage.getItem('tb_user')
+    if (t && u) {
+      authToken   = t
+      currentUser = JSON.parse(u)
+      updateHeader()
+      return true
+    }
+  } catch(e) {}
+  return false
+}
+
+// ── Login ───────────────────────────────────────────────
+function doLogin() {
+  var email = document.getElementById('l-email').value.trim()
+  var pass  = document.getElementById('l-pass').value
+  var msg   = document.getElementById('login-msg')
+  msg.className = 'msg'
+
+  if (!email || !pass) {
+    msg.className = 'msg err show'
+    msg.innerHTML = 'Enter email and password.'
+    return
+  }
+
+  msg.className = 'msg show'
+  msg.innerHTML = 'Logging in...'
+
+  fetch(SB_URL + '/auth/v1/token?grant_type=password', {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, password: pass })
+  })
+  .then(function(r) { return r.json() })
+  .then(function(d) {
+    if (d.access_token) {
+      saveSession(d.access_token, d.user)
+      msg.className = 'msg show'
+      msg.innerHTML = 'Welcome back!'
+      setTimeout(function() {
+        go('pg-menu')
+        loadStats()
+        loadMyFlush()
+      }, 800)
+    } else {
+      msg.className = 'msg err show'
+      msg.innerHTML = d.error_description || d.msg || 'Login failed.'
+    }
+  })
+  .catch(function() {
+    msg.className = 'msg err show'
+    msg.innerHTML = 'Network error. Check signal.'
+  })
+}
+
+// ── Signup ──────────────────────────────────────────────
+function doSignup() {
+  var uname = document.getElementById('su-user').value.trim()
+  var email = document.getElementById('su-email').value.trim()
+  var pass  = document.getElementById('su-pass').value
+  var msg   = document.getElementById('signup-msg')
+  msg.className = 'msg'
+
+  if (!uname || !email || !pass) {
+    msg.className = 'msg err show'
+    msg.innerHTML = 'All fields required.'
+    return
+  }
+  if (pass.length < 6) {
+    msg.className = 'msg err show'
+    msg.innerHTML = 'Password min 6 chars.'
+    return
+  }
+
+  msg.className = 'msg show'
+  msg.innerHTML = 'Creating account...'
+
+  fetch(SB_URL + '/auth/v1/signup', {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: email,
+      password: pass,
+      data: { username: uname }
+    })
+  })
+  .then(function(r) { return r.json() })
+  .then(function(d) {
+    if (d.access_token) {
+      saveSession(d.access_token, d.user)
+      msg.className = 'msg show'
+      msg.innerHTML = 'Account created! +50 FLUSH earned!'
+      setTimeout(function() {
+        go('pg-menu')
+        loadStats()
+        loadMyFlush()
+      }, 1200)
+    } else if (d.id || (d.user && d.user.id)) {
+      msg.className = 'msg warn show'
+      msg.innerHTML = 'Check your email to confirm, then login.'
+    } else {
+      msg.className = 'msg err show'
+      msg.innerHTML = d.error_description || d.msg || 'Signup failed.'
+    }
+  })
+  .catch(function() {
+    msg.className = 'msg err show'
+    msg.innerHTML = 'Network error. Check signal.'
+  })
+}
+
+// ── Logout ──────────────────────────────────────────────
+function doLogout() {
+  clearSession()
+  go('pg-login')
+}
+
+// ── Stars ───────────────────────────────────────────────
+var STAR_LABELS = ['','AVOID','BELOW AVG','DECENT','PRETTY GOOD','SPOTLESS!']
 function setStar(n) {
   curStar = n
   for (var i = 1; i <= 5; i++) {
@@ -424,21 +537,20 @@ function setStar(n) {
     el.className = i <= n ? 'star-btn sel' : 'star-btn'
     el.innerHTML = i <= n ? '*' : i
   }
-  document.getElementById('star-label').innerHTML = STAR_LABELS[n]
+  document.getElementById('star-label').innerHTML = STAR_LABELS[n] || ''
 }
 
-// ── GPS ──────────────────────────────────────
-function startGPS() {
+// ── GPS ─────────────────────────────────────────────────
+function startGPS(showNear) {
   var bar = document.getElementById('gps-bar')
-  var msg = document.getElementById('find-gps-msg')
-  bar.className = 'gps-bar'
+  bar.className = 'gps-bar searching'
   bar.innerHTML = 'GPS: SEARCHING...'
-  if (msg) { msg.className = 'msg show'; msg.innerHTML = 'Getting your GPS location...' }
+  var msg = document.getElementById('find-msg')
+  if (msg && showNear) { msg.className = 'msg show'; msg.innerHTML = 'Getting location...' }
 
   if (!navigator.geolocation) {
     bar.className = 'gps-bar off'
     bar.innerHTML = 'GPS: NOT SUPPORTED'
-    if (msg) { msg.innerHTML = 'GPS not available on this device.' }
     return
   }
 
@@ -448,213 +560,296 @@ function startGPS() {
       gpsLng = pos.coords.longitude.toFixed(5)
       bar.className = 'gps-bar'
       bar.innerHTML = 'GPS: ' + gpsLat + ', ' + gpsLng
-      if (msg) { msg.className = 'msg'; msg.innerHTML = '' }
-      showNearby()
+      if (msg) msg.className = 'msg'
+      if (showNear) showNearby()
     },
     function() {
       bar.className = 'gps-bar off'
       bar.innerHTML = 'GPS: DENIED'
-      if (msg) { msg.className = 'msg err show'; msg.innerHTML = 'Location denied. Enter manually.' }
+      if (msg && showNear) {
+        msg.className = 'msg err show'
+        msg.innerHTML = 'Location denied.'
+      }
     },
-    { timeout: 10000, maximumAge: 60000 }
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
   )
 }
 
-// ── Show nearby toilets ──────────────────────
+// ── Nearby toilets ──────────────────────────────────────
 function showNearby() {
   if (!gpsLat || !gpsLng) return
-  var el = document.getElementById('find-results')
-  el.innerHTML = '<div style="color:#888;font-size:10px;">Searching nearby...</div>'
-
+  var el  = document.getElementById('find-results')
+  el.innerHTML = '<div style="color:#888;font-size:10px;">Searching...</div>'
   var lat = parseFloat(gpsLat)
   var lng = parseFloat(gpsLng)
-  var d   = 0.05 // ~5km
+  var d   = 0.05
 
   var url = SB_URL + '/rest/v1/toilets?select=name,address,location_lat,location_lng,avg_overall,review_count' +
-    '&location_lat=gte.' + (lat - d) + '&location_lat=lte.' + (lat + d) +
-    '&location_lng=gte.' + (lng - d) + '&location_lng=lte.' + (lng + d) +
-    '&order=review_count.desc&limit=8'
+    '&location_lat=gte.' + (lat-d) + '&location_lat=lte.' + (lat+d) +
+    '&location_lng=gte.' + (lng-d) + '&location_lng=lte.' + (lng+d) +
+    '&order=review_count.desc&limit=6'
 
   fetch(url, { headers: HDR })
     .then(function(r) { return r.json() })
     .then(function(data) {
       if (!data || !data.length) {
-        el.innerHTML = '<div style="color:#888;font-size:10px;">No rated toilets nearby yet.<br/>Be the first to review one!</div>'
+        el.innerHTML = '<div style="color:#888;font-size:10px;">None nearby yet.<br/>Be the first to review!</div>'
         return
       }
       var html = ''
       for (var i = 0; i < data.length; i++) {
-        var t = data[i]
+        var t    = data[i]
         var name = t.name || 'Public Toilet'
-        var addr = t.address || ''
         var avg  = t.avg_overall ? t.avg_overall.toFixed(1) : '--'
-        var cnt  = t.review_count || 0
-        var dist = getDistKm(lat, lng, t.location_lat, t.location_lng)
-        html += '<div class="review">'
-        html += '<div class="r-venue">' + name + '</div>'
-        if (addr) html += '<div style="color:#888;font-size:9px;">' + addr + '</div>'
+        var dist = distKm(lat, lng, t.location_lat, t.location_lng)
+        html += '<div style="border:1px solid #333;padding:3px;margin:2px 0;">'
+        html += '<div style="color:#ff0;font-weight:bold;">' + name + '</div>'
         html += '<div style="font-size:9px;color:#0ff;">' + dist + 'km away</div>'
-        html += '<div class="r-stars">Rating: ' + avg + '/5 (' + cnt + ' reviews)</div>'
+        html += '<div style="font-size:9px;">Rating: ' + avg + '/5 (' + t.review_count + ' reviews)</div>'
         html += '</div>'
       }
       el.innerHTML = html
     })
     .catch(function() {
-      el.innerHTML = '<div style="color:#f00;font-size:10px;">Network error. Check connection.</div>'
+      el.innerHTML = '<div style="color:#f00;font-size:10px;">Network error.</div>'
     })
 }
 
-// ── Distance calc ────────────────────────────
-function getDistKm(lat1, lng1, lat2, lng2) {
+function distKm(lat1, lng1, lat2, lng2) {
   var R = 6371
-  var dLat = (lat2 - lat1) * Math.PI / 180
-  var dLng = (lng2 - lng1) * Math.PI / 180
-  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-    Math.sin(dLng/2) * Math.sin(dLng/2)
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-  return (R * c).toFixed(1)
+  var dL = (lat2-lat1)*Math.PI/180
+  var dG = (lng2-lng1)*Math.PI/180
+  var a  = Math.sin(dL/2)*Math.sin(dL/2) +
+    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+    Math.sin(dG/2)*Math.sin(dG/2)
+  return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(1)
 }
 
-// ── Submit review ────────────────────────────
+// ── Photo ───────────────────────────────────────────────
+function handlePhoto(input) {
+  var file = input.files && input.files[0]
+  if (!file) return
+  if (file.size > 15 * 1024 * 1024) {
+    document.getElementById('photo-status').innerHTML = 'Max 15MB'
+    document.getElementById('photo-status').style.color = '#f00'
+    return
+  }
+  photoFile = file
+  var reader = new FileReader()
+  reader.onload = function(e) {
+    document.getElementById('photo-img').src = e.target.result
+    document.getElementById('photo-preview').style.display = 'block'
+    document.getElementById('photo-btns').style.display    = 'none'
+    document.getElementById('photo-status').innerHTML = 'Photo ready!'
+    document.getElementById('photo-status').style.color = '#0f0'
+  }
+  reader.readAsDataURL(file)
+}
+
+function clearPhoto() {
+  photoFile = null
+  document.getElementById('photo-img').src                = ''
+  document.getElementById('photo-preview').style.display  = 'none'
+  document.getElementById('photo-btns').style.display     = 'block'
+  document.getElementById('photo-status').innerHTML       = ''
+  document.getElementById('photo-cam').value              = ''
+  document.getElementById('photo-gal').value              = ''
+}
+
+function uploadPhoto(cb) {
+  if (!photoFile) { cb(null); return }
+  var ext  = (photoFile.name || 'jpg').split('.').pop()
+  var path = 'flip/' + Date.now() + '_' + (deviceInfo.short||'flip') + '.' + ext
+  var url  = SB_URL + '/storage/v1/object/bathroom-pics/' + path
+  var ps   = document.getElementById('photo-status')
+  ps.innerHTML = 'Uploading photo...'
+  ps.style.color = '#ff0'
+
+  fetch(url, {
+    method:  'POST',
+    headers: Object.assign({}, HDR, {
+      'Authorization': 'Bearer ' + (authToken || SB_KEY),
+      'Content-Type':  photoFile.type || 'image/jpeg'
+    }),
+    body: photoFile
+  })
+  .then(function(r) {
+    if (r.ok) {
+      var pub = SB_URL + '/storage/v1/object/public/bathroom-pics/' + path
+      ps.innerHTML   = 'Photo uploaded!'
+      ps.style.color = '#0f0'
+      cb(pub)
+    } else {
+      ps.innerHTML   = 'Photo upload failed'
+      ps.style.color = '#f80'
+      cb(null)
+    }
+  })
+  .catch(function() {
+    ps.innerHTML   = 'Upload error'
+    ps.style.color = '#f00'
+    cb(null)
+  })
+}
+
+// ── Submit review ───────────────────────────────────────
 function submitRate() {
   var msg = document.getElementById('rate-msg')
   msg.className = 'msg'
 
+  if (!currentUser) {
+    msg.className = 'msg err show'
+    msg.innerHTML = 'Please login first.'
+    setTimeout(function() { go('pg-login') }, 1200)
+    return
+  }
   if (!curStar) {
     msg.className = 'msg err show'
-    msg.innerHTML = 'Please select a star rating!'
+    msg.innerHTML = 'Select a star rating!'
     return
   }
 
   msg.className = 'msg show'
-  msg.innerHTML = 'Submitting...'
+  msg.innerHTML = 'Getting GPS...'
 
-  // Get GPS silently
-  var doSubmit = function(lat, lng) {
-    var body = {
-      rating:                    curStar,
-      store_name:                document.getElementById('r-venue').value || null,
-      caption:                   document.getElementById('r-notes').value || null,
-      has_adult_changing_station: document.getElementById('r-adult').checked,
-      has_family_bathroom:        document.getElementById('r-family').checked,
-      has_gender_neutral:         document.getElementById('r-neutral').checked,
-      image_url:                 'https://toilet-book.com/icons/icon-96x96.png',
-      moderation_status:         'approved',
-      tags:                      [],
-      source:                    'flip',
-    }
+  var doPost = function(lat, lng) {
+    msg.innerHTML = 'Uploading...'
+    uploadPhoto(function(imgUrl) {
+      msg.innerHTML = 'Submitting review...'
 
-    fetch(SB_URL + '/rest/v1/posts', {
-      method: 'POST',
-      headers: Object.assign({}, HDR, {
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      }),
-      body: JSON.stringify(body)
-    })
-    .then(function(r) { return r.json() })
-    .then(function(data) {
-      msg.className = 'msg show'
-      msg.innerHTML = 'REVIEW POSTED! +10 FLUSH earned.'
-      // Reset
-      curStar = 0
-      setStar(0)
-      document.getElementById('r-venue').value  = ''
-      document.getElementById('r-notes').value  = ''
-      document.getElementById('r-adult').checked   = false
-      document.getElementById('r-family').checked  = false
-      document.getElementById('r-neutral').checked = false
-    })
-    .catch(function() {
-      msg.className = 'msg err show'
-      msg.innerHTML = 'Network error. Try again.'
+      var adult   = document.getElementById('r-adult').checked
+      var family  = document.getElementById('r-family').checked
+      var neutral = document.getElementById('r-neutral').checked
+
+      var body = {
+        rating:                     curStar,
+        store_name:                 document.getElementById('r-venue').value || null,
+        has_adult_changing_station: adult,
+        has_family_bathroom:        family,
+        has_gender_neutral:         neutral,
+        image_url:                  imgUrl || 'https://toilet-book.com/android-chrome-192x192.png',
+        moderation_status:          'approved',
+        tags:                       [],
+        source:                     'flip-' + (deviceInfo.short || 'phone'),
+      }
+      if (lat) body.location_lat = parseFloat(lat)
+      if (lng) body.location_lng = parseFloat(lng)
+
+      fetch(SB_URL + '/rest/v1/posts', {
+        method:  'POST',
+        headers: Object.assign({}, getAuthHdr(), { 'Prefer': 'return=minimal' }),
+        body:    JSON.stringify(body)
+      })
+      .then(function(r) {
+        if (r.ok || r.status === 201) {
+          var pts = 10
+          if (adult)   pts += 25
+          if (family)  pts += 15
+          if (neutral) pts += 15
+          msg.className = 'msg show'
+          msg.innerHTML = 'POSTED! +' + pts + ' FLUSH earned!'
+          // Reset form
+          curStar = 0; setStar(0)
+          document.getElementById('r-venue').value    = ''
+          document.getElementById('r-adult').checked  = false
+          document.getElementById('r-family').checked = false
+          document.getElementById('r-neutral').checked= false
+          clearPhoto()
+          // Update balance display
+          loadMyFlush()
+        } else {
+          return r.json().then(function(e) {
+            msg.className = 'msg err show'
+            msg.innerHTML = e.message || 'Post failed.'
+          })
+        }
+      })
+      .catch(function() {
+        msg.className = 'msg err show'
+        msg.innerHTML = 'Network error. Try again.'
+      })
     })
   }
 
+  // Get GPS then post
   if (gpsLat && gpsLng) {
-    doSubmit(gpsLat, gpsLng)
+    doPost(gpsLat, gpsLng)
   } else if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       function(pos) {
         gpsLat = pos.coords.latitude.toFixed(5)
         gpsLng = pos.coords.longitude.toFixed(5)
-        document.getElementById('gps-bar').innerHTML = 'GPS: ' + gpsLat + ', ' + gpsLng
         document.getElementById('gps-bar').className = 'gps-bar'
-        doSubmit(gpsLat, gpsLng)
+        document.getElementById('gps-bar').innerHTML = 'GPS: ' + gpsLat + ', ' + gpsLng
+        doPost(gpsLat, gpsLng)
       },
-      function() { doSubmit(null, null) },
-      { timeout: 6000 }
+      function() { doPost(null, null) },
+      { enableHighAccuracy: true, timeout: 8000 }
     )
   } else {
-    doSubmit(null, null)
+    doPost(null, null)
   }
 }
 
-// ── Load feed ────────────────────────────────
-function loadFeed() {
-  var el = document.getElementById('feed-list')
-  el.innerHTML = '<div style="color:#888;font-size:10px;">Loading...</div>'
-
-  fetch(SB_URL + '/rest/v1/posts?select=rating,store_name,caption,created_at,has_adult_changing_station&order=created_at.desc&limit=10', {
-    headers: HDR
-  })
-  .then(function(r) { return r.json() })
-  .then(function(data) {
-    if (!data || !data.length) {
-      el.innerHTML = '<div style="color:#888;font-size:10px;">No reviews yet. Be the first!</div>'
-      return
-    }
-    var html = ''
-    for (var i = 0; i < data.length; i++) {
-      var p     = data[i]
-      var name  = p.store_name || 'Public Toilet'
-      var stars = ''
-      for (var s = 0; s < p.rating; s++) stars += '*'
-      var dt   = new Date(p.created_at)
-      var time = dt.toLocaleDateString('en-US', { month:'short', day:'numeric' })
-      html += '<div class="review">'
-      html += '<div class="r-venue">' + name + '</div>'
-      html += '<div class="r-stars">' + stars + ' (' + p.rating + '/5)</div>'
-      if (p.caption) html += '<div class="r-body">' + p.caption.substring(0, 60) + '</div>'
-      if (p.has_adult_changing_station) html += '<div style="color:#0f0;font-size:9px;">+ Adult station</div>'
-      html += '<div class="r-time">' + time + '</div>'
-      html += '</div>'
-    }
-    el.innerHTML = html
-  })
-  .catch(function() {
-    el.innerHTML = '<div style="color:#f00;font-size:10px;">Network error.</div>'
-  })
-}
-
-// ── Load live stats ──────────────────────────
+// ── Stats ───────────────────────────────────────────────
 function loadStats() {
-  // Reviews count
+  // Total toilets
+  fetch(SB_URL + '/rest/v1/toilets?select=id&limit=1', {
+    headers: Object.assign({}, HDR, { 'Prefer': 'count=exact' })
+  }).then(function(r) {
+    var cr = r.headers.get('content-range')
+    if (cr) {
+      var n = parseInt(cr.split('/')[1])
+      var el = document.getElementById('stat-total')
+      if (el) el.innerHTML = n >= 1000 ? (n/1000).toFixed(0)+'K+' : n
+    }
+  }).catch(function(){})
+
+  // Total reviews
   fetch(SB_URL + '/rest/v1/posts?select=id&limit=1', {
     headers: Object.assign({}, HDR, { 'Prefer': 'count=exact' })
   }).then(function(r) {
     var cr = r.headers.get('content-range')
     if (cr) {
-      var n = parseInt(cr.split('/')[1])
-      document.getElementById('stat-reviews').innerHTML = n > 999 ? (n/1000).toFixed(1)+'K' : n
+      var n  = parseInt(cr.split('/')[1])
+      var el = document.getElementById('stat-reviews')
+      if (el) el.innerHTML = n >= 1000 ? (n/1000).toFixed(1)+'K' : n
     }
-  }).catch(function() {})
-
-  // Users count
-  fetch(SB_URL + '/rest/v1/profiles?select=id&limit=1', {
-    headers: Object.assign({}, HDR, { 'Prefer': 'count=exact' })
-  }).then(function(r) {
-    var cr = r.headers.get('content-range')
-    if (cr) {
-      var n = parseInt(cr.split('/')[1])
-      document.getElementById('stat-users').innerHTML = n > 999 ? (n/1000).toFixed(1)+'K' : n
-    }
-  }).catch(function() {})
+  }).catch(function(){})
 }
 
-// ── Init ─────────────────────────────────────
-loadStats()
+function loadMyFlush() {
+  if (!currentUser) return
+  fetch(SB_URL + '/rest/v1/profiles?select=flush_balance&id=eq.' + currentUser.id + '&limit=1', {
+    headers: Object.assign({}, HDR, { 'Authorization': 'Bearer ' + (authToken || SB_KEY) })
+  })
+  .then(function(r) { return r.json() })
+  .then(function(d) {
+    if (d && d[0]) {
+      var pts    = d[0].flush_balance || 0
+      var tokens = pts * 10
+      var balEl  = document.getElementById('flush-bal')
+      var tokEl  = document.getElementById('flush-tokens-display')
+      var smEl   = document.getElementById('stat-myflush')
+      if (balEl) balEl.innerHTML = pts + ' pts'
+      if (tokEl) tokEl.innerHTML = '= ' + tokens.toLocaleString() + ' FLUSH'
+      if (smEl)  smEl.innerHTML  = pts + ' pts'
+    }
+  }).catch(function(){})
+}
+
+// ── Init ────────────────────────────────────────────────
+detectDevice()
+
+// Try restoring session
+if (loadSession()) {
+  go('pg-menu')
+  loadStats()
+  loadMyFlush()
+  startGPS(false) // silent GPS grab on load
+} else {
+  go('pg-login')
+}
 </script>
 </body>
 </html>
