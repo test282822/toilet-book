@@ -439,10 +439,19 @@ function doLogin() {
 
   fetch(SB_URL + '/auth/v1/token?grant_type=password', {
     method: 'POST',
-    headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+    headers: {
+      'apikey': SB_KEY,
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + SB_KEY
+    },
     body: JSON.stringify({ email: email, password: pass })
   })
-  .then(function(r) { return r.json() })
+  .then(function(r) {
+    return r.json().then(function(d) {
+      d._status = r.status
+      return d
+    })
+  })
   .then(function(d) {
     if (d.access_token) {
       saveSession(d.access_token, d.user)
@@ -455,12 +464,13 @@ function doLogin() {
       }, 800)
     } else {
       msg.className = 'msg err show'
-      msg.innerHTML = d.error_description || d.msg || 'Login failed.'
+      var errMsg = d.error_description || d.error || d.msg || d.message || 'Login failed.'
+      msg.innerHTML = errMsg
     }
   })
-  .catch(function() {
+  .catch(function(e) {
     msg.className = 'msg err show'
-    msg.innerHTML = 'Network error. Check signal.'
+    msg.innerHTML = 'Network error: ' + (e.message || 'Check signal.')
   })
 }
 
@@ -488,7 +498,11 @@ function doSignup() {
 
   fetch(SB_URL + '/auth/v1/signup', {
     method: 'POST',
-    headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+    headers: {
+      'apikey': SB_KEY,
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + SB_KEY
+    },
     body: JSON.stringify({
       email: email,
       password: pass,
@@ -511,7 +525,7 @@ function doSignup() {
       msg.innerHTML = 'Check your email to confirm, then login.'
     } else {
       msg.className = 'msg err show'
-      msg.innerHTML = d.error_description || d.msg || 'Signup failed.'
+      msg.innerHTML = d.error_description || d.error || d.msg || d.message || 'Signup failed.'
     }
   })
   .catch(function() {
