@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import {
   Users, Star, MapPin, RefreshCw, Loader2, Flag,
   TrendingUp, Toilet, Eye, AlertTriangle, Globe,
@@ -13,17 +13,27 @@ const HDR = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
 // ── Change this to your chosen password ──────────────────
 const ADMIN_PASS = "flushmaster2026"
 
-async function sbCount(table: string, filter = "") {
-  const res = await fetch(`${SB_URL}/rest/v1/${table}?select=id${filter ? `&${filter}` : ""}&limit=1`, {
-    headers: { ...HDR, Prefer: "count=exact" }
-  })
-  const cr = res.headers.get("content-range")
-  return cr ? parseInt(cr.split("/")[1]) : 0
+async function sbCount(table: string, filter = ""): Promise<number> {
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/${table}?select=id${filter ? `&${filter}` : ""}&limit=1`, {
+      headers: { ...HDR, Prefer: "count=exact" }
+    })
+    const cr = res.headers.get("content-range")
+    return cr ? parseInt(cr.split("/")[1]) : 0
+  } catch {
+    return 0
+  }
 }
 
 async function sbSelect<T>(table: string, params: string): Promise<T[]> {
-  const res = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: HDR })
-  return res.json()
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: HDR })
+    if (!res.ok) return []
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch {
+    return []
+  }
 }
 
 function fmt(n: number | null): string {
@@ -124,8 +134,8 @@ function Dashboard() {
         sbCount("toilets", "review_count=gt.0"),
         sbCount("posts", `created_at=gte.${new Date(Date.now()-86400000).toISOString()}`),
         sbCount("posts", `created_at=gte.${new Date(Date.now()-604800000).toISOString()}`),
-        sbCount("posts", "source=like.flip*"),
-        sbCount("posts", "moderation_status=eq.flagged"),
+        sbCount("posts", "source=ilike.flip%"),
+        sbCount("posts", "moderation_status=eq.flagged").catch(() => 0),
       ])
 
       setMetrics({ totalToilets, totalReviews, totalUsers, adultStations, reviewedPins, todayReviews, weekReviews, flaggedCount })
@@ -139,8 +149,8 @@ function Dashboard() {
 
       // Flagged content
       const flags = await sbSelect<any>("posts",
-        "select=id,store_name,rating,created_at,source&moderation_status=eq.flagged&order=created_at.desc&limit=20"
-      )
+        "select=id,store_name,rating,created_at,source,moderation_status&order=created_at.desc&limit=5"
+      ).then(d => d.filter((p: any) => p.moderation_status === "flagged"))
       setFlagged(flags)
 
       // Top users by FLUSH balance
@@ -283,7 +293,7 @@ function Dashboard() {
                       <span className="text-amber-400 text-xs">{"★".repeat(p.rating)}{"☆".repeat(5-p.rating)}</span>
                     </td>
                     <td className="px-2 py-3 text-center">
-                      <span className={`text-xs px-1.5 py-0.5 rounded-full ${p.source?.includes("flip") ? "bg-yellow-500/20 text-yellow-400" : "bg-slate-700 text-slate-400"}`}>
+                      <span className={`text-xs px-1.5 py-0.5 rounded-full ${(p.source || "").includes("flip") ? "bg-yellow-500/20 text-yellow-400" : "bg-slate-700 text-slate-400"}`}>
                         {p.source || "web"}
                       </span>
                     </td>
@@ -438,5 +448,24 @@ export default function AdminStatsPage() {
   }
 
   if (!authed) return <LoginGate onAuth={handleAuth} />
-  return <Dashboard />
+  return <ErrorBoundary><Dashboard /></ErrorBoundary>
+}
+
+class ErrorBoundary extends React.Component<{children: React.ReactNode},{error:string|null}> {
+  constructor(props: any) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(e: any) { return { error: e?.message || "Unknown error" } }
+  render() {
+    if (this.state.error) return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <div className="text-4xl mb-4">🚽</div>
+          <h2 className="text-white font-bold mb-2">Dashboard error</h2>
+          <p className="text-slate-400 text-sm mb-4">{this.state.error}</p>
+          <button onClick={() => this.setState({error:null})}
+            className="bg-sky-500 text-white px-4 py-2 rounded-lg text-sm">Try again</button>
+        </div>
+      </div>
+    )
+    return this.props.children
+  }
 }

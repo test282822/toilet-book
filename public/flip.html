@@ -380,21 +380,17 @@ function getAuthHdr() {
 function saveSession(token, user) {
   authToken   = token
   currentUser = user
-  try {
-    localStorage.setItem('tb_token', token)
-    localStorage.setItem('tb_user',  JSON.stringify(user))
-  } catch(e) {}
-  updateHeader()
+  try { localStorage.setItem('tb_token', token) } catch(e) {}
+  try { localStorage.setItem('tb_user',  JSON.stringify(user)) } catch(e) {}
+  try { updateHeader() } catch(e) {}
 }
 
 function clearSession() {
   authToken   = null
   currentUser = null
-  try {
-    localStorage.removeItem('tb_token')
-    localStorage.removeItem('tb_user')
-  } catch(e) {}
-  updateHeader()
+  try { localStorage.removeItem('tb_token') } catch(e) {}
+  try { localStorage.removeItem('tb_user') }  catch(e) {}
+  try { updateHeader() } catch(e) {}
 }
 
 function updateHeader() {
@@ -410,16 +406,18 @@ function updateHeader() {
 }
 
 function loadSession() {
-  try {
-    var t = localStorage.getItem('tb_token')
-    var u = localStorage.getItem('tb_user')
-    if (t && u) {
+  var t = null
+  var u = null
+  try { t = localStorage.getItem('tb_token') } catch(e) { return false }
+  try { u = localStorage.getItem('tb_user') }  catch(e) { return false }
+  if (t && u) {
+    try {
       authToken   = t
       currentUser = JSON.parse(u)
-      updateHeader()
+      try { updateHeader() } catch(e) {}
       return true
-    }
-  } catch(e) {}
+    } catch(e) {}
+  }
   return false
 }
 
@@ -839,16 +837,20 @@ function loadMyFlush() {
 }
 
 // ── Init ────────────────────────────────────────────────
-detectDevice()
+try { detectDevice() } catch(e) {}
 
-// Try restoring session
-if (loadSession()) {
-  go('pg-menu')
-  loadStats()
-  loadMyFlush()
-  startGPS(false) // silent GPS grab on load
-} else {
-  go('pg-login')
+try {
+  if (loadSession()) {
+    go('pg-menu')
+    try { loadStats() }   catch(e) {}
+    try { loadMyFlush() } catch(e) {}
+    try { startGPS(false) } catch(e) {}
+  } else {
+    go('pg-login')
+  }
+} catch(e) {
+  // fallback — always show login
+  try { go('pg-login') } catch(e2) {}
 }
 </script>
 </body>
