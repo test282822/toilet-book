@@ -15,8 +15,9 @@ function isUS(lat: number, lng: number) {
 }
 
 function toPct(lat: number, lng: number) {
-  const x = ((lng - LNG_MIN) / (LNG_MAX - LNG_MIN)) * 100
-  const y = ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * 100
+  // Map to SVG viewBox 960x600 coords
+  const x = ((lng - LNG_MIN) / (LNG_MAX - LNG_MIN)) * 960
+  const y = ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * 600
   return { x, y }
 }
 
@@ -192,73 +193,113 @@ export function AdminLiveMap() {
           style={{ background: "#0d1b2a" }}
           onMouseLeave={() => setHovered(null)}
         >
-          {/* US map image — public domain from Wikimedia */}
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Blank_US_Map_%28states_only%29.svg/1280px-Blank_US_Map_%28states_only%29.svg.png"
-            alt="Blank US map with state outlines"
+          {/* Inline SVG US map — no external deps */}
+          <svg
+            viewBox="0 0 960 600"
             className="w-full block"
-            style={{ opacity: 0.7, filter: "saturate(0.3) brightness(0.55)" }}
-          />
+            style={{ opacity: 0.75 }}
+            aria-hidden="true"
+          >
+            {/* Ocean */}
+            <rect width="960" height="600" fill="#0d1b2a"/>
+            {/* Land mass — continental US rough outline */}
+            <path fill="#1e3a4a" stroke="#2d5a6e" strokeWidth="1.5" d="
+              M180,80 L220,60 L290,55 L360,50 L430,48 L500,50 L560,52
+              L620,50 L680,48 L740,52 L790,58 L830,65 L860,75 L880,90
+              L890,110 L885,130 L870,150 L865,170 L875,190 L880,210
+              L870,230 L855,245 L840,255 L830,270 L825,285
+              L840,295 L850,310 L845,325 L830,335 L810,340
+              L790,335 L775,320 L760,310 L740,320 L720,330
+              L700,340 L685,355 L680,375 L690,395 L700,415
+              L695,435 L680,450 L660,460 L640,455 L620,440
+              L600,430 L575,435 L555,450 L540,465 L530,480
+              L515,490 L495,488 L480,478 L465,465 L450,455
+              L435,450 L415,448 L395,452 L375,460 L355,468
+              L335,470 L315,465 L295,455 L280,442 L265,428
+              L250,415 L238,400 L228,385 L218,368 L210,350
+              L200,332 L192,315 L185,298 L178,280 L172,262
+              L165,244 L158,225 L152,205 L148,185 L145,165
+              L142,145 L140,125 L142,108 L150,92 L165,83 Z
+            "/>
+            {/* Florida peninsula */}
+            <path fill="#1e3a4a" stroke="#2d5a6e" strokeWidth="1.5" d="
+              M640,455 L650,470 L658,488 L662,508 L658,528
+              L648,545 L635,555 L620,558 L607,550 L598,535
+              L592,518 L590,500 L595,482 L604,468 L615,458 Z
+            "/>
+            {/* Great Lakes rough */}
+            <ellipse cx="640" cy="165" rx="18" ry="12" fill="#0d1b2a" opacity="0.8"/>
+            <ellipse cx="680" cy="145" rx="22" ry="10" fill="#0d1b2a" opacity="0.8"/>
+            <ellipse cx="720" cy="155" rx="14" ry="8"  fill="#0d1b2a" opacity="0.8"/>
+            <ellipse cx="750" cy="140" rx="12" ry="7"  fill="#0d1b2a" opacity="0.8"/>
+            {/* State grid lines — approximate */}
+            {[
+              "M420,48 L410,340", "M530,50 L518,340", "M640,50 L628,340",
+              "M750,52 L738,300", "M290,55 L282,340",
+              "M142,180 L860,175", "M145,260 L855,252", "M148,335 L840,330",
+            ].map((d,i) => (
+              <path key={i} d={d} fill="none" stroke="#1d4060" strokeWidth="0.6" opacity="0.6"/>
+            ))}
+            {/* City dots */}
+            {[
+              {x:780,y:220,label:"NYC"},{x:280,y:290,label:"LA"},{x:620,y:190,label:"CHI"},
+              {x:480,y:370,label:"HOU"},{x:720,y:410,label:"MIA"},{x:208,y:148,label:"SEA"},
+              {x:670,y:320,label:"ATL"},{x:310,y:200,label:"DEN"},{x:800,y:200,label:"BOS"},
+            ].map(({x,y,label}) => (
+              <g key={label}>
+                <circle cx={x} cy={y} r="3" fill="#334d5c"/>
+                <text x={x+5} y={y+4} fontSize="9" fill="#4a6778" fontFamily="monospace">{label}</text>
+              </g>
+            ))}
+          </svg>
 
-          {/* Pins layer — absolutely positioned over image */}
-          <div className="absolute inset-0">
-            {/* HQ marker */}
-            <div
-              className="absolute"
-              style={{ left: `${hq.x}%`, top: `${hq.y}%`, transform: "translate(-50%,-100%)" }}
-            >
-              <div className="h-3 w-3 rounded-full bg-sky-400 border-2 border-white mx-auto shadow-lg" />
-              <div className="text-xs text-sky-400 text-center mt-0.5 font-semibold" style={{ fontSize: 9 }}>HQ</div>
-            </div>
+          {/* SVG overlay for pins — sits on top of map SVG using absolute positioning */}
+          <svg
+            viewBox="0 0 960 600"
+            className="absolute inset-0 w-full h-full"
+            style={{ pointerEvents: "none" }}
+          >
+            {/* HQ dot — Cocoa FL */}
+            <circle cx={hq.x} cy={hq.y} r="6" fill="#38bdf8" stroke="white" strokeWidth="1.5" opacity="0.9"/>
+            <circle cx={hq.x} cy={hq.y} r="12" fill="none" stroke="#38bdf8" strokeWidth="1" opacity="0.4">
+              <animate attributeName="r" from="6" to="18" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" from="0.5" to="0" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <text x={hq.x + 8} y={hq.y - 8} fontSize="9" fill="#38bdf8" fontFamily="monospace" fontWeight="600">HQ</text>
 
             {/* Activity pins */}
             {pins.map(pin => (
-              <div
+              <g
                 key={pin.id}
-                className="absolute cursor-pointer"
-                style={{
-                  left: `${pin.x}%`,
-                  top: `${pin.y}%`,
-                  transform: "translate(-50%,-50%)",
-                  opacity: Math.max(0.15, 1 - pin.age / 100),
-                  zIndex: Math.round(100 - pin.age),
-                }}
+                opacity={Math.max(0.15, 1 - pin.age / 100)}
+                style={{ pointerEvents: "all", cursor: "pointer" }}
                 onMouseEnter={e => handlePinEnter(pin, e)}
                 onMouseLeave={() => setHovered(null)}
               >
                 {/* Pulse ring */}
-                <div
-                  className="absolute rounded-full border pointer-events-none"
-                  style={{
-                    borderColor: pin.color,
-                    top: "50%", left: "50%",
-                    transform: "translate(-50%,-50%)",
-                    animation: "pinRing 2.5s ease-out infinite",
-                    width: 10, height: 10,
-                  }}
-                />
-                {/* Dot */}
-                <div
-                  className="rounded-full border-2 border-white relative z-10"
-                  style={{ width: 10, height: 10, background: pin.color }}
-                />
-              </div>
+                <circle cx={pin.x} cy={pin.y} r="5" fill="none" stroke={pin.color} strokeWidth="1.5" opacity="0">
+                  <animate attributeName="r" from="5" to="18" dur="2.5s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" from="0.7" to="0" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                {/* Pin dot */}
+                <circle cx={pin.x} cy={pin.y} r="5" fill={pin.color} stroke="white" strokeWidth="1.5"/>
+              </g>
             ))}
+          </svg>
 
-            {/* Tooltip */}
-            {hovered && (
-              <div
-                className="absolute bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white pointer-events-none z-50 shadow-xl"
-                style={{ left: tooltipPos.x, top: tooltipPos.y, maxWidth: 180 }}
-              >
-                <p className="font-semibold truncate">{hovered.name}</p>
-                <p className="text-slate-400 mt-0.5">
-                  {hovered.rating ? "★".repeat(hovered.rating) + " " + hovered.rating + "/5" : "No rating"}
-                </p>
-                <p className="text-slate-500 mt-0.5">{timeAgo(hovered.createdAt)}</p>
-              </div>
-            )}
-          </div>
+          {/* HTML tooltip — positioned absolutely */}
+          {hovered && (
+            <div
+              className="absolute bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white pointer-events-none z-50 shadow-xl"
+              style={{ left: tooltipPos.x, top: tooltipPos.y, maxWidth: 180 }}
+            >
+              <p className="font-semibold truncate">{hovered.name}</p>
+              <p className="text-slate-400 mt-0.5">
+                {hovered.rating ? "★".repeat(hovered.rating) + " " + hovered.rating + "/5" : "No rating"}
+              </p>
+              <p className="text-slate-500 mt-0.5">{timeAgo(hovered.createdAt)}</p>
+            </div>
+          )}
         </div>
 
         {/* Region breakdown */}
