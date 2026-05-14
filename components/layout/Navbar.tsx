@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
-import { Toilet, Plus, LogIn, LogOut, User, Menu, X, MapPin, ShoppingBag, Zap, ChevronDown, Star, Accessibility, Plane, Navigation, Building2, Sparkles } from "lucide-react"
+import { Toilet, Plus, LogIn, LogOut, User, Menu, X, MapPin, ShoppingBag, Zap, ChevronDown, Star, Accessibility, Plane, Navigation, Building2, Sparkles, Mail, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
@@ -118,7 +118,7 @@ function NavbarInner({ profile }: NavbarProps) {
                       </Link>
                     ))}
                   </div>
-                  <div className="border-t border-slate-100 dark:border-slate-800 px-3 py-2">
+                  <div className="border-t border-slate-100 dark:border-slate-800 px-3 py-2 space-y-1">
                     <Link
                       href="/spotlight"
                       className="flex items-center gap-2 text-xs text-violet-500 hover:text-violet-400 transition-colors"
@@ -126,6 +126,14 @@ function NavbarInner({ profile }: NavbarProps) {
                     >
                       <Sparkles className="h-3 w-3" />
                       Get your venue featured → Spotlight
+                    </Link>
+                    <Link
+                      href="/referrals"
+                      className="flex items-center gap-2 text-xs text-emerald-500 hover:text-emerald-400 transition-colors"
+                      onClick={() => setShowBestBy(false)}
+                    >
+                      <Gift className="h-3 w-3" />
+                      Refer friends → earn FLUSH
                     </Link>
                   </div>
                 </div>
@@ -175,6 +183,24 @@ function NavbarInner({ profile }: NavbarProps) {
                     >
                       <User className="h-4 w-4" />
                       My Profile
+                    </Link>
+
+                    {/* Referrals */}
+                    <Link
+                      href="/referrals"
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                      <Users className="h-4 w-4 text-emerald-500" />
+                      Referrals
+                    </Link>
+
+                    {/* Email digest */}
+                    <Link
+                      href="/email-digest"
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                      <Mail className="h-4 w-4 text-sky-500" />
+                      Email digest
                     </Link>
 
                     {/* FLUSH tokens */}
@@ -329,6 +355,7 @@ function NavbarInner({ profile }: NavbarProps) {
                   { href: "/most-accessible-public-bathrooms", icon: <Accessibility className="h-4 w-4 text-blue-500" />,   label: "Most accessible" },
                   { href: "/adult-changing-stations-near-me",  icon: <Accessibility className="h-4 w-4 text-violet-500" />, label: "Adult changing stations" },
                   { href: "/spotlight",                        icon: <Sparkles className="h-4 w-4 text-violet-400" />,      label: "Get your venue featured" },
+                  { href: "/referrals",                        icon: <Gift className="h-4 w-4 text-emerald-400" />,         label: "Refer friends — earn FLUSH" },
                 ].map(({ href, icon, label }) => (
                   <Link
                     key={href}
@@ -395,6 +422,7 @@ function NavbarInner({ profile }: NavbarProps) {
                   { href: "/most-accessible-public-bathrooms", icon: <Accessibility className="h-4 w-4 text-blue-500" />,   label: "Most accessible" },
                   { href: "/adult-changing-stations-near-me",  icon: <Accessibility className="h-4 w-4 text-violet-500" />, label: "Adult changing stations" },
                   { href: "/spotlight",                        icon: <Sparkles className="h-4 w-4 text-violet-400" />,      label: "Get your venue featured" },
+                  { href: "/referrals",                        icon: <Gift className="h-4 w-4 text-emerald-400" />,         label: "Refer friends — earn FLUSH" },
                 ].map(({ href, icon, label }) => (
                   <Link
                     key={href}
