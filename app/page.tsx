@@ -2,12 +2,13 @@ import { Suspense } from "react"
 import Link from "next/link"
 import {
   Toilet, MapPin, Star, Users, Sparkles,
-  ArrowRight, Navigation, ChevronRight, Coins
+  ArrowRight, Navigation, ChevronRight, Coins, Plus
 } from "lucide-react"
 import { Navbar }    from "@/components/layout/Navbar"
 import { PostFeed }  from "@/components/feed/PostFeed"
 import { getFeedPosts } from "@/lib/posts"
-import { NearMeButton } from "@/components/layout/NearMeButton"
+import { NearMeButton }   from "@/components/layout/NearMeButton"
+import { PostNowButton } from "@/components/layout/PostNowButton"
 import { createClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
@@ -114,14 +115,20 @@ export default async function HomePage() {
 
               {/* CTAs */}
               <div className="flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/25 hover:opacity-90 transition-opacity"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  Join Free &amp; Earn FLUSH
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+                {user ? (
+                  /* Logged in — Post Now button opens modal */
+                  <PostNowButton />
+                ) : (
+                  /* Logged out — sign up */
+                  <Link
+                    href="/signup"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/25 hover:opacity-90 transition-opacity"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Join Free &amp; Earn FLUSH
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                )}
                 <NearMeButton />
               </div>
             </div>

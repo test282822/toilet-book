@@ -41,11 +41,22 @@ export default async function ProfilePage({ params }: { params: { username: stri
     myProfile = data
   }
 
-  const { data: profile } = await supabase
+  // Try by username first, then by ID (handles null username edge case)
+  let { data: profile } = await supabase
     .from("profiles")
     .select("id, username, full_name, avatar_url, bio, website, created_at, flush_balance, reviewer_badge, total_reviews, referral_code, referral_count")
     .eq("username", params.username)
     .single()
+
+  // Fallback: if username lookup fails, try by user ID
+  if (!profile) {
+    const { data: profileById } = await supabase
+      .from("profiles")
+      .select("id, username, full_name, avatar_url, bio, website, created_at, flush_balance, reviewer_badge, total_reviews, referral_code, referral_count")
+      .eq("id", params.username)
+      .single()
+    profile = profileById
+  }
 
   if (!profile) notFound()
 
