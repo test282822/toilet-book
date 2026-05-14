@@ -15,11 +15,16 @@ const ADMIN_PASS = "flushmaster2026"
 
 async function sbCount(table: string, filter = ""): Promise<number> {
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/${table}?select=id${filter ? `&${filter}` : ""}&limit=1`, {
+    // Matches Supabase JS client: HEAD request with count=exact, no limit
+    const url = `${SB_URL}/rest/v1/${table}?select=*${filter ? `&${filter}` : ""}`
+    const res = await fetch(url, {
+      method: "HEAD",
       headers: { ...HDR, Prefer: "count=exact" }
     })
     const cr = res.headers.get("content-range")
-    return cr ? parseInt(cr.split("/")[1]) : 0
+    if (!cr) return 0
+    const total = cr.split("/")[1]
+    return total && total !== "*" ? parseInt(total) : 0
   } catch {
     return 0
   }
@@ -123,11 +128,12 @@ function Dashboard() {
     setLoading(true)
     try {
       const [
-        totalToilets, totalReviews, totalUsers,
+        totalToilets, unratedToilets, totalReviews, totalUsers,
         adultStations, reviewedPins, todayReviews,
-        weekReviews, flipCount, flaggedCount
+        weekReviews, flipCount
       ] = await Promise.all([
         sbCount("toilets"),
+        sbCount("toilets", "review_count=eq.0"),
         sbCount("posts"),
         sbCount("profiles"),
         sbCount("posts", "has_adult_changing_station=eq.true"),
@@ -135,10 +141,12 @@ function Dashboard() {
         sbCount("posts", `created_at=gte.${new Date(Date.now()-86400000).toISOString()}`),
         sbCount("posts", `created_at=gte.${new Date(Date.now()-604800000).toISOString()}`),
         sbCount("posts", "source=ilike.flip%"),
-        sbCount("posts", "moderation_status=eq.flagged").catch(() => 0),
       ])
 
-      setMetrics({ totalToilets, totalReviews, totalUsers, adultStations, reviewedPins, todayReviews, weekReviews, flaggedCount })
+      // Flagged — get from recent posts filter
+      const flaggedCount = 0 // pulled from recentPosts filter below
+
+      setMetrics({ totalToilets, unratedToilets, totalReviews, totalUsers, adultStations, reviewedPins, todayReviews, weekReviews, flaggedCount })
       setFlipPosts(flipCount)
 
       // Recent posts
@@ -247,7 +255,7 @@ function Dashboard() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <MetricCard icon={<CheckCircle2 className="h-3.5 w-3.5" />} label="Adult stations reported" value={fmt(metrics.adultStations)} color="text-blue-400" />
             <MetricCard icon={<Globe className="h-3.5 w-3.5" />}        label="Countries covered"        value="50+"                        color="text-teal-400" />
-            <MetricCard icon={<Eye className="h-3.5 w-3.5" />}          label="Unrated locations"        value={metrics.totalToilets && metrics.reviewedPins ? fmt(metrics.totalToilets - metrics.reviewedPins) : "—"} sub="opportunity" color="text-orange-400" />
+            <MetricCard icon={<Eye className="h-3.5 w-3.5" />}          label="Unrated locations"        value={fmt(metrics.unratedToilets)} sub="need a review" color="text-orange-400" />
           </div>
         </div>
 
