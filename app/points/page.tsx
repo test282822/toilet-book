@@ -224,6 +224,16 @@ export default async function PointsPage() {
             <p className="text-xs text-slate-500 text-center pt-1">
               Register your Solana wallet address in your profile settings to secure your airdrop spot
             </p>
+            <div className="pt-1">
+              <a
+                href="https://docs.google.com/document/d/1dGkNBm54XEsNou9jQnkC9KI7Ih9_4Sxr/edit?usp=sharing&ouid=103945640703295940575&rtpof=true&sd=true"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-800 border border-slate-600 text-slate-200 text-xs font-semibold py-2.5 hover:bg-slate-700 hover:border-slate-500 transition-colors"
+              >
+                📄 Read the FLUZH Token Whitepaper →
+              </a>
+            </div>
           </div>
         </div>
       </main>
