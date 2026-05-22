@@ -66,20 +66,29 @@ export default async function ProfilePage({
     myProfile = data
   }
 
-  // Try username lookup first, then fall back to ID
-  let { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("username", params.username)
-    .maybeSingle()
+  // Try username first, then ID (handles empty string, null, and UUID cases)
+  let profile = null
 
+  // Only query by username if it looks like a username not a UUID
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.username)
+
+  if (!isUUID && params.username && params.username.trim()) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("username", params.username)
+      .maybeSingle()
+    profile = data
+  }
+
+  // Fall back to ID lookup
   if (!profile) {
-    const { data: byId } = await supabase
+    const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", params.username)
       .maybeSingle()
-    profile = byId
+    profile = data
   }
 
   if (!profile) notFound()

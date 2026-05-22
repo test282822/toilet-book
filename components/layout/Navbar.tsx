@@ -178,7 +178,7 @@ function NavbarInner({ profile }: NavbarProps) {
 
                     {/* Profile link */}
                     <Link
-                      href={profile.username ? `/profile/${profile.username}` : `/profile/${profile.id}`}
+                      href={profile.username && profile.username.trim() ? `/profile/${profile.username}` : `/profile/${profile.id}`}
                       className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
                     >
                       <User className="h-4 w-4" />
@@ -291,7 +291,7 @@ function NavbarInner({ profile }: NavbarProps) {
 
                 {/* Profile */}
                 <Link
-                  href={profile.username ? `/profile/${profile.username}` : `/profile/${profile.id}`}
+                  href={profile.username && profile.username.trim() ? `/profile/${profile.username}` : `/profile/${profile.id}`}
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
                 >
