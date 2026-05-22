@@ -176,14 +176,6 @@ function NavbarInner({ profile }: NavbarProps) {
                   {/* Dropdown */}
                   <div className="absolute right-0 top-full mt-1 w-52 rounded-xl border border-slate-200 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-900 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150">
 
-                    {/* Profile link */}
-                    <Link
-                      href={profile.username && profile.username.trim() ? `/profile/${profile.username}` : `/profile/${profile.id}`}
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-                    >
-                      <User className="h-4 w-4" />
-                      My Profile
-                    </Link>
 
                     {/* Referrals */}
                     <Link
@@ -289,16 +281,7 @@ function NavbarInner({ profile }: NavbarProps) {
                   Rate a Toilet
                 </button>
 
-                {/* Profile */}
-                <Link
-                  href={profile.username && profile.username.trim() ? `/profile/${profile.username}` : `/profile/${profile.id}`}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-                >
-                  <User className="h-4 w-4" />
-                  My Profile
-                </Link>
-
+          
                 {/* FLUSH */}
                 <Link
                   href="/points"
