@@ -66,19 +66,19 @@ export default async function ProfilePage({
     myProfile = data
   }
 
-  // Try username lookup first, then ID fallback
+  // Try username lookup first, then fall back to ID
   let { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("username", params.username)
-    .single()
+    .maybeSingle()
 
   if (!profile) {
     const { data: byId } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", params.username)
-      .single()
+      .maybeSingle()
     profile = byId
   }
 
