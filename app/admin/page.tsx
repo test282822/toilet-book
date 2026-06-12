@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import { AdminDashboard } from "@/components/admin/AdminDashboard(5)"
+import { AdminDashboard } from "@/components/admin/AdminDashboard"
 
 export const dynamic = "force-dynamic"
 
