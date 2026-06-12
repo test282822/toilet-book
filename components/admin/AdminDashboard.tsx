@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from "react"
 import { AdminLiveMap } from "@/components/admin/AdminLiveMap"
+import { AdminBusinessPanel } from "@/components/admin/AdminBusinessPanel"
 import {
   Users, Star, MapPin, Flag, TrendingUp, Toilet,
   Eye, AlertTriangle, Globe, Zap, Clock,
@@ -81,14 +82,16 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
   )
 }
 
-export function AdminDashboard({ data }: { data: any }) {
+export function AdminDashboard({ data, isAdminAccount = false }: { data: any; isAdminAccount?: boolean }) {
   const [authed, setAuthed] = useState(false)
 
   useEffect(() => {
+    // Admin accounts skip the password gate entirely
+    if (isAdminAccount) { setAuthed(true); return }
     try {
       if (sessionStorage.getItem("tb_admin") === "1") setAuthed(true)
     } catch {}
-  }, [])
+  }, [isAdminAccount])
 
   const handleAuth = () => {
     try { sessionStorage.setItem("tb_admin", "1") } catch {}
@@ -274,6 +277,14 @@ export function AdminDashboard({ data }: { data: any }) {
             </tbody>
           </table>
         </div>
+
+        {/* Business account management — admin accounts only */}
+        {isAdminAccount && (
+          <AdminBusinessPanel
+            pendingClaims={data.pendingClaims ?? []}
+            businessAccounts={data.businessAccounts ?? []}
+          />
+        )}
 
         {/* Live activity map */}
         <AdminLiveMap />

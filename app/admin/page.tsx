@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import { AdminDashboard } from "@/components/admin/AdminDashboard"
+import { AdminDashboard } from "@/components/admin/AdminDashboard(5)"
 
 export const dynamic = "force-dynamic"
 
@@ -116,6 +116,38 @@ async function getAdminStats() {
 }
 
 export default async function AdminPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Check if logged-in account is an admin
+  let isAdminAccount = false
+  if (user) {
+    const { data: me } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .maybeSingle()
+    isAdminAccount = me?.is_admin === true
+  }
+
   const data = await getAdminStats()
-  return <AdminDashboard data={data} />
+
+  // Business management data — only fetched for admin accounts
+  let pendingClaims: any[] = []
+  let businessAccounts: any[] = []
+  if (isAdminAccount) {
+    const [{ data: claims }, { data: accounts }] = await Promise.all([
+      supabase.rpc("admin_get_pending_claims"),
+      supabase.rpc("admin_get_business_accounts"),
+    ])
+    pendingClaims    = claims   ?? []
+    businessAccounts = accounts ?? []
+  }
+
+  return (
+    <AdminDashboard
+      data={{ ...data, pendingClaims, businessAccounts }}
+      isAdminAccount={isAdminAccount}
+    />
+  )
 }
