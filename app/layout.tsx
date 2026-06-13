@@ -5,6 +5,8 @@ import { Toaster } from "react-hot-toast"
 import { ThemeProvider }          from "@/components/layout/ThemeProvider"
 import { ServiceWorkerRegistrar } from "@/components/layout/ServiceWorkerRegistrar"
 import { PWAInstallBanner }       from "@/components/layout/PWAInstallBanner"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -192,7 +194,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://dltanpkvuxomubasfepm.supabase.co" />
       </head>
-      <body className={inter.className}>
+      < className={inter.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -215,6 +217,8 @@ export default function RootLayout({
             }}
           />
         </ThemeProvider>
+        <Analytics />
+      <SpeedInsights />
       </body>
     </html>
   )
