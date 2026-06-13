@@ -194,7 +194,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://dltanpkvuxomubasfepm.supabase.co" />
       </head>
-      < className={inter.className}>
+      <body className={inter.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
