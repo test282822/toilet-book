@@ -1,5 +1,5 @@
 -- ============================================================
---  Bathroom Vibes – Migration v2
+--  Toilet Book – Migration v2
 --  Run this in the Supabase SQL Editor
 -- ============================================================
 

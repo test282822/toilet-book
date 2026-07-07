@@ -13,6 +13,7 @@ interface Toilet {
   has_adult_changing_station: boolean; has_family_bathroom: boolean
   has_gender_neutral: boolean; fee: boolean
 }
+interface ReviewPhoto { id: string; image_url: string; rating: number; caption: string | null }
 interface Filters { adultStation: boolean; familyBathroom: boolean; genderNeutral: boolean; freeOnly: boolean; ratedOnly: boolean }
 
 function getPinColor(avg: number, count: number) {
@@ -58,6 +59,31 @@ function MapInner() {
   filtersRef.current = filters
   const MIN_ZOOM = 8
   const searchParams = useSearchParams()
+
+  // ── Review photos for the selected pin ─────────────────────
+  const [photos, setPhotos]           = useState<ReviewPhoto[]>([])
+  const [photosLoading, setPhotosLoading] = useState(false)
+
+  useEffect(() => {
+    if (!selected) { setPhotos([]); return }
+    let cancelled = false
+    setPhotosLoading(true)
+    const supabase = createClient()
+    supabase
+      .from('posts')
+      .select('id, image_url, rating, caption')
+      .eq('toilet_id', selected.id)
+      .eq('moderation_status', 'approved')
+      .not('image_url', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(6)
+      .then(({ data, error }) => {
+        if (cancelled) return
+        setPhotosLoading(false)
+        if (!error && data) setPhotos(data as ReviewPhoto[])
+      })
+    return () => { cancelled = true }
+  }, [selected])
 
   useEffect(() => {
     const on  = () => setIsOffline(false)
@@ -112,7 +138,6 @@ function MapInner() {
       const map = L.map(mapRef.current!, { center:[20,0], zoom:2 })
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom:19 }).addTo(map)
       leafletMap.current = map
-      // ── Check URL params first (from NearMe button) ──────────
       const urlLat  = parseFloat(searchParams.get('lat')  || '')
       const urlLng  = parseFloat(searchParams.get('lng')  || '')
       const urlZoom = parseInt(searchParams.get('zoom') || '15', 10)
@@ -179,7 +204,7 @@ function MapInner() {
       {noResults && !loading && !tooZoomedOut && <EmptyState type="no-toilets" />}
       {mapError && !loading && <EmptyState type="error" onAction={retryFetch} />}
       {selected && (
-        <div style={{ position:'absolute', bottom:20, left:'50%', transform:'translateX(-50%)', width:'min(380px, calc(100vw - 32px))', background:'#0f172a', border:'1px solid rgba(255,255,255,0.1)', borderRadius:16, padding:16, zIndex:1000, boxShadow:'0 20px 60px rgba(0,0,0,0.6)' }}>
+        <div style={{ position:'absolute', bottom:20, left:'50%', transform:'translateX(-50%)', width:'min(380px, calc(100vw - 32px))', maxHeight:'70vh', overflowY:'auto', background:'#0f172a', border:'1px solid rgba(255,255,255,0.1)', borderRadius:16, padding:16, zIndex:1000, boxShadow:'0 20px 60px rgba(0,0,0,0.6)' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10 }}>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:15, fontWeight:600, color:'#fff', marginBottom:2 }}>{selected.name||'Public Toilet'}</div>
@@ -200,6 +225,32 @@ function MapInner() {
             {selected.has_family_bathroom        && <span style={{ fontSize:11, padding:'2px 8px', borderRadius:10, background:'rgba(56,189,248,0.15)', color:'#38bdf8' }}>👨‍👩‍👧 Family bathroom</span>}
             {selected.has_gender_neutral          && <span style={{ fontSize:11, padding:'2px 8px', borderRadius:10, background:'rgba(129,140,248,0.15)', color:'#a5b4fc' }}>⚧ Gender neutral</span>}
           </div>
+
+          {/* ── Review photos ── */}
+          {photosLoading ? (
+            <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:11, color:'#64748b', marginBottom:14 }}>
+              <Loader2 style={{ width:12, height:12, animation:'spin 1s linear infinite' }} /> Loading photos...
+            </div>
+          ) : photos.length > 0 ? (
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:11, color:'#94a3b8', marginBottom:6, fontWeight:600 }}>Recent photos</div>
+              <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4 }}>
+                {photos.map(p => (
+                  <a key={p.id} href={p.image_url} target="_blank" rel="noopener noreferrer" style={{ flexShrink:0 }}>
+                    <img
+                      src={p.image_url}
+                      alt={p.caption || 'Bathroom review photo'}
+                      style={{ width:64, height:64, objectFit:'cover', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)' }}
+                      loading="lazy"
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : selected.review_count > 0 ? (
+            <div style={{ fontSize:11, color:'#475569', marginBottom:14 }}>No photos posted with reviews yet</div>
+          ) : null}
+
           <div style={{ display:'flex', gap:8 }}>
             <a href={`https://www.google.com/maps?q=${selected.location_lat},${selected.location_lng}`} target="_blank" rel="noopener noreferrer" style={{ flex:1, textAlign:'center', padding:'8px 0', borderRadius:10, fontSize:13, fontWeight:500, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', textDecoration:'none' }}>📍 Directions</a>
             <Link href="/signup" style={{ flex:1, textAlign:'center', padding:'8px 0', borderRadius:10, fontSize:13, fontWeight:500, background:'linear-gradient(135deg,#0ea5e9,#6366f1)', color:'#fff', textDecoration:'none' }}>⭐ Rate it</Link>

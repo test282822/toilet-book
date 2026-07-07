@@ -12,6 +12,7 @@ async function getAdminStats() {
     { count: unratedToilets },
     { count: totalReviews },
     { count: totalUsers },
+    
     { count: adultStations },
     { count: familyBathrooms },
     { count: genderNeutral },

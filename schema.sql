@@ -1,5 +1,5 @@
 -- ============================================================
---  Bathroom Vibes – Supabase SQL Schema
+--  Toilet Book – Supabase SQL Schema
 --  Run this in the Supabase SQL editor
 -- ============================================================
 
@@ -141,14 +141,27 @@ create trigger on_like_delete
 -- insert into storage.buckets (id, name, public) values ('bathroom-pics', 'bathroom-pics', true);
 
 -- Storage RLS
-create policy "Anyone can view bathroom pics"
+create policy "Anyone can view toilet pics"
   on storage.objects for select
-  using (bucket_id = 'bathroom-pics');
+  using (bucket_id = 'toilet-pics');
 
 create policy "Authenticated users can upload"
   on storage.objects for insert
-  with check (bucket_id = 'bathroom-pics' and auth.role() = 'authenticated');
+  with check (bucket_id = 'toilet-pics' and auth.role() = 'authenticated');
 
 create policy "Users can delete their own uploads"
   on storage.objects for delete
-  using (bucket_id = 'bathroom-pics' and auth.uid()::text = (storage.foldername(name))[1]);
+  using (bucket_id = 'toilet-pics' and auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "Anyone can view toilet pics"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'toilet-pics');
+
+CREATE POLICY "Authenticated users can upload"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'toilet-pics' AND auth.role() = 'authenticated');
+
+CREATE POLICY "Users can delete their own uploads"
+  ON storage.objects FOR DELETE
+  USING (bucket_id = 'toilet-pics' AND auth.uid()::text = (storage.foldername(name))[1]);
+  
