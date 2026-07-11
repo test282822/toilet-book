@@ -91,7 +91,7 @@ export function PostFeed({ initialPosts, currentUserId }: PostFeedProps) {
             </span>
           </h2>
           <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-7">
-            No reviews yet — which means every bathroom on the map is up for grabs.
+            less than 100 reviews — which means every bathroom on the map is up for grabs.
             Post the first one and earn <strong className="text-slate-700 dark:text-slate-200">+15 bonus FLUZH points</strong>.
           </p>
 
