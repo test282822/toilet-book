@@ -69,6 +69,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   const [likesCount, setLikesCount] = useState(post.likes_count)
   const [isLiking, setIsLiking]   = useState(false)
   const [imgLoaded, setImgLoaded] = useState(false)
+  const [imgError, setImgError]   = useState(false)
   const [reported, setReported]   = useState(false)
   const [isReporting, setIsReporting] = useState(false)
 
@@ -122,14 +123,23 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
         {!imgLoaded && (
           <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700" />
         )}
-        <Image
-          src={post.image_url}
-          alt={post.store_name ?? "Toilet photo"}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className={cn("object-cover transition-all duration-500 group-hover:scale-[1.03]", imgLoaded ? "opacity-100" : "opacity-0")}
-          onLoad={() => setImgLoaded(true)}
-        />
+        {imgError ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 text-slate-400">
+            <span className="text-3xl mb-1">🚽</span>
+            <span className="text-xs">Photo unavailable</span>
+          </div>
+        ) : (
+          <Image
+            src={post.image_url}
+            alt={post.store_name ?? "Toilet photo"}
+            fill
+            unoptimized
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className={cn("object-cover transition-all duration-500 group-hover:scale-[1.03]", imgLoaded ? "opacity-100" : "opacity-0")}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => { setImgError(true); setImgLoaded(true) }}
+          />
+        )}
 
         {/* Like button */}
         <button
