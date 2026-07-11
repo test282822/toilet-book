@@ -120,7 +120,7 @@ export function PostFeed({ initialPosts, currentUserId }: PostFeedProps) {
           )}
 
           <p className="text-xs text-slate-400 mt-5">
-            47,000+ locations mapped worldwide. Zero rated yet. Yours could be first.
+            47,000+ locations mapped worldwide.
           </p>
         </div>
       </div>
