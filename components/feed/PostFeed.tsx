@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Loader2, Wind } from "lucide-react"
+import { Loader2, Sparkles, ArrowRight, Plus } from "lucide-react"
+import Link from "next/link"
 import { PostCard } from "@/components/feed/PostCard"
 import { createClient } from "@/lib/supabase/client"
 import type { FeedPost } from "@/types"
@@ -73,16 +74,55 @@ export function PostFeed({ initialPosts, currentUserId }: PostFeedProps) {
 
   if (posts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/30 dark:to-blue-900/30 mb-4">
-          <Wind className="h-10 w-10 text-sky-400" />
+      <div className="relative overflow-hidden rounded-3xl border border-sky-200/60 dark:border-sky-800/40 bg-gradient-to-br from-sky-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 py-16 px-6 text-center">
+        {/* Blobs to match launch page energy */}
+        <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-sky-200/40 dark:bg-sky-800/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 h-48 w-48 rounded-full bg-indigo-200/40 dark:bg-indigo-800/15 blur-3xl pointer-events-none" />
+
+        <div className="relative">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-sm mx-auto mb-5 text-3xl">
+            🚽
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+            Be the first review.{" "}
+            <span className="bg-gradient-to-r from-sky-500 to-indigo-500 bg-clip-text text-transparent">
+              Earn FLUZH.
+            </span>
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-7">
+            No reviews yet — which means every bathroom on the map is up for grabs.
+            Post the first one and earn <strong className="text-slate-700 dark:text-slate-200">+15 bonus FLUZH points</strong>.
+          </p>
+
+          {currentUserId ? (
+            <button
+              onClick={() => {
+                const url = new URL(window.location.href)
+                url.searchParams.set("post", "true")
+                window.history.pushState({}, "", url)
+                window.dispatchEvent(new PopStateEvent("popstate"))
+              }}
+              className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 px-7 py-3.5 text-base font-bold text-white shadow-lg shadow-sky-500/25 hover:opacity-90 active:scale-[0.98] transition-all"
+            >
+              <Plus className="h-5 w-5" />
+              Post the first review
+            </button>
+          ) : (
+            <Link
+              href="/signup?ref=empty-feed"
+              className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 px-7 py-3.5 text-base font-bold text-white shadow-lg shadow-sky-500/25 hover:opacity-90 active:scale-[0.98] transition-all"
+            >
+              <Sparkles className="h-5 w-5" />
+              Join Free — Earn FLUZH
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+          )}
+
+          <p className="text-xs text-slate-400 mt-5">
+            47,000+ locations mapped worldwide. Zero rated yet. Yours could be first.
+          </p>
         </div>
-        <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">
-          No reviews yet
-        </h2>
-        <p className="text-slate-400 max-w-xs">
-          Be the first to rate a bathroom and get the community going!
-        </p>
       </div>
     )
   }
